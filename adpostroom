@@ -1,0 +1,2568 @@
+<?php
+include("common/header.php");
+if(!isset($_SESSION['id'])){
+echo '<script type="text/javascript">
+window.location = "http://103.10.234.192/~tirbhinnat/roomies/login.php"
+</script>';
+}
+$type = $_GET['type'];
+if(isset($_POST['submit'])){ 
+extract($_POST);
+$roomtype = $_POST['roomtype'];
+$bathroom = $_POST['bathroom'];
+$address = $_POST['address'];
+$apt = $_POST['apt'];
+$country = $_POST['country'];
+$state = $_POST['state'];
+$city = $_POST['city'];
+$monthlyrent = $_POST['monthlyrent'];
+$securitydeposit = $_POST['securitydeposit'];
+$roomfor = $_POST['roomfor'];
+$interest_gender = $_POST['interest_gender'];
+$idealroommate =$_POST['idealroommate'];
+$occupation_do = $_POST['occupation_do'];
+$collegename = $_POST['collegename'];
+$nowdate = $_POST['nowdate'];
+$movedate = $_POST['movedate'];
+$latitude = $_POST['latitude'];
+$longitude = $_POST['longitude'];
+ $amenities = implode(',', $_POST['amenities']); 
+$am = str_replace('-', '', $amenities);
+$rule = implode(',', $_POST['rule']);  
+ $ru = str_replace('-', '', $rule);
+
+if($type == 'postroom'){
+echo "INSERT INTO postroom(user_id,type,roomtype,bathroom,address,apt,country,state,city,monthlyrent,securitydeposit,roomfor,nowdate,movedate,amenities,rule,latitude,longitude,description,currrentdate) VALUES ('".$_SESSION['id']."','".$type."','$roomtype','$bathroom','$address','$apt','$country','$state','$city','$monthlyrent','$securitydeposit','$roomfor','$nowdate','$movedate','$am','$ru','$latitude','$longitude','$description','$datetime')";
+}
+else if($type == 'roommate'){
+$sql=mysqli_query($con,"INSERT INTO postroom(user_id,type,roomtype,bathroom,address,apt,country,state,city,monthlyrent,securitydeposit,occupation_do,collegename,interest_gender,idealroommate,nowdate,movedate,amenities,rule,latitude,longitude,description,currrentdate) VALUES ('".$_SESSION['id']."','".$type."','$roomtype','$bathroom','$address','$country','$state','$city','$monthlyrent','$securitydeposit','$occupation_do','$collegename','$interest_gender','$idealroommate','$nowdate','$movedate','$am','$ru','$latitude','$longitude','$description','$datetime')") or die(mysqli_error($con));
+}
+
+
+if($sql){
+$last = mysqli_insert_id($con);
+
+if(isset($_FILES['uploadimage']['name']))
+{
+$file_name_all="";
+for($i=0; $i<count($_FILES['uploadimage']['name']); $i++) 
+{
+$tmpFilePath = $_FILES['uploadimage']['tmp_name'][$i];    
+if ($tmpFilePath != "")
+{    
+$path = "assets/img/roomimages/"; // create folder 
+$name = $_FILES['uploadimage']['name'][$i];
+$size = $_FILES['uploadimage']['size'][$i];
+
+list($txt, $ext) = explode(".", $name);
+$file= time().substr(str_replace(" ", "_", $txt), 0);
+$info = pathinfo($file);
+$filename ='image'. $file.".".$ext;
+}
+if(move_uploaded_file($_FILES['uploadimage']['tmp_name'][$i], $path.$filename)) 
+{ 
+$sql_image=mysqli_query($con,"insert into roomimages(postroom_id,type,uploadimage) values('$last','$type','".$filename."')") or die(mysqli_error($con));
+
+}
+}
+
+}
+
+
+if(isset($_FILES['bedimage']['name']))
+{
+$file_name_all="";
+for($i=0; $i<count($_FILES['bedimage']['name']); $i++) 
+{
+$tmpFilePath = $_FILES['bedimage']['tmp_name'][$i];    
+if ($tmpFilePath != "")
+{    
+$path = "assets/img/roomimages/"; // create folder 
+$name = $_FILES['bedimage']['name'][$i];
+$size = $_FILES['bedimage']['size'][$i];
+
+list($txt, $ext) = explode(".", $name);
+$file= time().substr(str_replace(" ", "_", $txt), 0);
+$info = pathinfo($file);
+$bedimage ='image'. $file.".".$ext;
+}
+if(move_uploaded_file($_FILES['bedimage']['tmp_name'][$i], $path.$bedimage)) 
+{ 
+$sql_bed=mysqli_query($con,"insert into roomimages(postroom_id,type,bedimage) values('$last','$type','".$bedimage."')") or die(mysqli_error($con));
+
+}
+}
+
+}
+
+
+if(isset($_FILES['bathroomimage']['name']))
+{
+$file_name_all="";
+for($i=0; $i<count($_FILES['bathroomimage']['name']); $i++) 
+{
+$tmpFilePath = $_FILES['bathroomimage']['tmp_name'][$i];    
+if ($tmpFilePath != "")
+{    
+$path = "assets/img/roomimages/"; // create folder 
+$name = $_FILES['bathroomimage']['name'][$i];
+$size = $_FILES['bathroomimage']['size'][$i];
+
+list($txt, $ext) = explode(".", $name);
+$file= time().substr(str_replace(" ", "_", $txt), 0);
+$info = pathinfo($file);
+$bathroomimage ='image'. $file.".".$ext;
+}
+if(move_uploaded_file($_FILES['bathroomimage']['tmp_name'][$i], $path.$bathroomimage)) 
+{ 
+$sql_bathroom=mysqli_query($con,"insert into roomimages(postroom_id,type,bathroomimage) values('$last','$type','".$bathroomimage."')") or die(mysqli_error($con));
+
+}
+}
+
+}
+
+
+if(isset($_FILES['kitchenimage']['name']))
+{
+$file_name_all="";
+for($i=0; $i<count($_FILES['kitchenimage']['name']); $i++) 
+{
+$tmpFilePath = $_FILES['kitchenimage']['tmp_name'][$i];    
+if ($tmpFilePath != "")
+{    
+$path = "assets/img/roomimages/"; // create folder 
+$name = $_FILES['kitchenimage']['name'][$i];
+$size = $_FILES['kitchenimage']['size'][$i];
+
+list($txt, $ext) = explode(".", $name);
+$file= time().substr(str_replace(" ", "_", $txt), 0);
+$info = pathinfo($file);
+$kitchenimage ='image'. $file.".".$ext;
+}
+if(move_uploaded_file($_FILES['kitchenimage']['tmp_name'][$i], $path.$kitchenimage)) 
+{ 
+$sql_kitchen=mysqli_query($con,"insert into roomimages(postroom_id,type,kitchenimage) values('$last','$type','".$kitchenimage."')") or die(mysqli_error($con));
+
+}
+}
+
+}
+
+
+if(isset($_FILES['balconyimage']['name']))
+{
+$file_name_all="";
+for($i=0; $i<count($_FILES['balconyimagebalconyimage']['name']); $i++) 
+{
+$tmpFilePath = $_FILES['balconyimage']['tmp_name'][$i];    
+if ($tmpFilePath != "")
+{    
+$path = "assets/img/roomimages/"; // create folder 
+$name = $_FILES['balconyimage']['name'][$i];
+$size = $_FILES['balconyimage']['size'][$i];
+
+list($txt, $ext) = explode(".", $name);
+$file= time().substr(str_replace(" ", "_", $txt), 0);
+$info = pathinfo($file);
+$balconyimage ='image'. $file.".".$ext;
+}
+if(move_uploaded_file($_FILES['balconyimage']['tmp_name'][$i], $path.$balconyimage)) 
+{ 
+$sql_balcony=mysqli_query($con,"insert into roomimages(postroom_id,type,balconyimage) values('$last','$type','".$balconyimage."')") or die(mysqli_error($con));
+
+}
+}
+
+}
+
+
+
+}
+}
+
+?>
+
+
+
+<style type="text/css">
+  
+  .gallery img,.gallery2 img,.gallery3 img,.gallery4 img,.gallery5 img {
+    max-height:50px !important;
+    border: 1px solid #111;
+    spa
+
+  }
+
+  .closeButton
+  {
+   position: absolute;
+    top: -18px;
+    right: -18px;
+    background: #999;
+    color: #fff;
+    padding: 10px;
+    border-radius: 100%;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    text-align: center;
+    padding-top: 8px;
+  }
+
+  .fileupbutton
+  {
+    width:150px;
+    height:150px;
+    border:5px #999 solid;
+    border-radius:3px;
+    text-align: center;
+    padding-top:55px;
+    font-size:30px;
+    color:#999;
+  }
+
+  .nowround,.moveround{
+    -moz-border-radius: 15px;
+ border-radius: 15px;
+    border:solid 1px black;
+    padding:5px;
+  }
+  
+</style>
+<div class="page-head"> 
+<div class="container">
+<div class="row">
+<div class="page-head-content">
+<h1 class="page-title">Submit new property</h1>               
+</div>
+</div>
+</div>
+</div>
+<div class="content-area submit-property" style="background-color: #FCFCFC;">&nbsp;
+<div class="container">
+<div class="clearfix" > 
+<div class="wizard-container"> 
+
+<div class="wizard-card ct-wizard-orange" id="wizardProperty">
+<form id="frm"  method="post" enctype="multipart/form-data">                        
+<div class="wizard-header">
+<h3>
+<b>Submit</b> YOUR PROPERTY <br>
+
+</h3>
+</div>
+
+<ul>
+<li><a href="#step1" data-toggle="tab">Step 1 </a></li>
+<li><a href="#step2" data-toggle="tab">Step 2 </a></li>
+<li><a href="#step3" data-toggle="tab">Step 3 </a></li>
+<li><a href="#step4" data-toggle="tab">Finished </a></li>
+</ul>
+
+<div class="tab-content">
+
+<div class="tab-pane" id="step1">
+<div class="row">
+<h4 class="info-text"> Upload Multiple Category Image</h4>
+<div class="col-sm-12">  
+<div class="row">
+
+
+<div style="margin-left:80px!important">
+<div class="col-md-10" style="margin-left: 130px">
+	<div class="row">
+
+		<div onclick="playSound('assets/img/upload/Voice over/living room.mp3')" class="col-sm-2"><div class="picture" data-rel= "div1" style="width:130px;height: 100px; " onclick="showDiv('div1')"><i  class="fa fa-plus-circle" style="float: right;"></i>
+<img src="assets/icon/room.jpg" class="picture-src"  title=""/>
+<!-- <input id="uploadimage" name="uploadimage[]" type="file"    multiple/> -->
+</div> </div>
+
+		<div onclick="playSound('assets/img/upload/Voice over/32 bathroom.mp3')" class="col-sm-2"><div class="picture" data-rel= "div2" style="width:130px;height: 100px;float: left; " onclick="showDiv('div2')"><i  class="fa fa-plus-circle" style="float: right;"></i>
+<img src="assets/icon/bathroom.jpg" class="picture-src"  title=""/>
+
+
+</div> </div>
+
+		<div onclick="playSound('assets/img/upload/Voice over/32 bathroom.mp3')" class="col-sm-2"><div class="picture" data-rel= "div3" style="width:130px;height: 100px; " onclick="showDiv('div3')"><i  class="fa fa-plus-circle" style="float: right;"></i>
+<img src="assets/icon/bed.jpg" class="picture-src"  title=""/>
+<!-- <input id="bedimage" type="file"   name="bedimage[]" multiple/> -->
+</div> </div>
+
+		<div onclick="playSound('assets/img/upload/Voice over/31 kitchen.mp3')" class="col-sm-2"><div class="picture" data-rel= "div4" style="width:130px;height: 100px; " onclick="showDiv('div4')"><i  class="fa fa-plus-circle" style="float: right;"></i>
+<img src="assets/icon/kitchen.jpg" class="picture-src"  title=""/>
+<!-- <input id="kitchenimage" name="kitchenimage[]" type="file"    multiple/>
+ --></div> </div>
+
+		<div onclick="playSound('assets/img/upload/Voice over/22 anyone pepole.mp3')" class="col-sm-2"><div class="picture" data-rel= "div5" style="width:130px;height: 100px; " onclick="showDiv('div5')"><i  class="fa fa-plus-circle" style="float: right;"></i>
+<img src="assets/icon/any.png" class="picture-src"  title=""/>
+<!-- <input id="balconyimage" type="file"  name="balconyimage[]"  multiple/>
+ --></div> </div>
+
+<div id="div1" class="abc" style="display: none">
+     
+    <div style="height:750px;width:900px;background:black;opacity:0.6;color:#fff;margin-top:200px;margin-left:-90px;padding-left: 40px;padding-top: 7px;" id="div-1" >
+           <div style="height:250px;width:850px;margin-left:-12px;border:1px solid #111background:transparent url(assets/img/imageupload/room.jpg') no-repeat scroll center center;background-size:cover">Room Image
+           
+           	</div>
+
+    	<center><h3> Room Image </h3></center>
+ <div class="pic"  style="width:130px;height: 100px; " >
+ 	
+<div class="fileupbutton" onclick="$('#uploadimage').trigger('click')">
+  <i class="fa fa-plus"></i>
+
+</div>
+		
+		<input  id="uploadimage" type="file" style="display:none" name="uploadimage[]"  multiple/>  
+		<div class="gallery" style="width:800px;margin-top:20px!important"></div>
+		            </div> 
+ 
+
+  </div>
+		
+ </div>
+
+<div id="div2" class="abc" style="display: none">
+     
+    <div style="height:750px;width:900px;;background:black;opacity:0.6;color:#fff;margin-top:200px;margin-left:-90px;padding-left: 40px;padding-top: 7px;" id="div-2" >
+           <div style="height:250px;width:850px;margin-left:-12px;border:1px solid #111;background:transparent url('assets/img/imageupload/bathroomupload.jpg') no-repeat scroll center center;background-size:cover">
+           
+          
+</div>
+
+    	<center><h3>  Bathroom  </h3></center>
+ <div class="pic"  style="width:130px;height: 100px; " >
+
+
+<div class="fileupbutton" onclick="$('#bathroomimage').trigger('click')">
+  <i class="fa fa-plus"></i>
+
+</div>
+  		<input  id="bathroomimage" type="file" style="display:none"  name="bathroomimage[]"  multiple/>  
+		<div class="gallery2" style="width:800px;margin-top:20px!important">
+      
+    </div>
+		  </div> 
+ 
+
+  </div>
+		
+</div>
+
+<div id="div3" class="abc" style="display: none">
+     
+    <div style="height:750px;width:900px;background:black;opacity:0.2;color:#fff;margin-top:200px;margin-left:-90px;padding-left: 40px;padding-top: 7px;" id="div-3" >
+           <div style="height:250px;width:850px;margin-left:-12px;border:1px solid #111;background:transparent url('assets/img/imageupload/bedroom.jpg') no-repeat scroll center center;background-size:cover">
+           	
+
+           </div>
+
+    	<center><h3> Add New Bedroom Image </h3></center>
+ <div class="pic"  style="width:130px;height: 100px; " >
+
+	<div class="fileupbutton" onclick="$('#bedroomimage').trigger('click')">
+  <i class="fa fa-plus"></i>
+
+</div>
+		<input  id="bedroomimage" type="file" style="display: none" name="bedroomimage[]"  multiple/>  
+		<div class="gallery3" style="width:800px;margin-top:20px!important"></div>
+		            </div> 
+ 
+
+  </div>
+		
+ </div>
+
+<div id="div4" class="abc" style="display: none">
+     
+    <div style="height:750px;width:900px;background:black;color:#fff;margin-top:200px;margin-left:-90px;padding-left: 40px;padding-top: 7px;" id="div-4" >
+           <div style="height:250px;width:850px;margin-left:-12px;border:1px solid #111;background:transparent url('assets/img/imageupload/kichen.jpg') no-repeat scroll center center;background-size:cover">
+           
+           </div>
+
+    	<center><h3> Add New Kitchen Image </h3></center>
+ <div class="pic"  style="width:130px;height: 100px; " >
+
+  <div class="fileupbutton" onclick="$('#kitchenimage').trigger('click')">
+  <i class="fa fa-plus"></i> 
+
+</div>
+		<input  id="kitchenimage" type="file" style="display: none" name="kitchenimage[]"  multiple/>  
+		<div class="gallery4" style="width:800px;margin-top:20px!important"></div>
+		            </div> 
+ 
+
+  </div>
+		
+</div>   
+
+<div id="div5" class="abc" style="display: none">
+     
+    <div style="height:750px;width:900px;background:#808080;color:#fff;margin-top:200px;margin-left:-90px;padding-left: 40px;padding-top: 7px;" id="div-5" >
+           <div style="height:250px;width:850px;margin-left:-12px;border:1px solid #111;background:transparent url('assets/img/imageupload/balcony.jpg') no-repeat scroll center center;background-size:cover">
+           
+           	
+           </div>
+
+    	<center><h3> Add New Balcony Image </h3></center>
+ <div class="pic"  style="width:130px;height: 100px; " >
+   <div class="fileupbutton" onclick="$('#balconyimage').trigger('click')">
+  <i class="fa fa-plus"></i>
+
+</div>
+		
+		<input  id="balconyimage" type="file"  style="display: none" name="balconyimage[]"  multiple/>  
+		<div class="gallery5" style="width:800px;margin-top:20px!important">&nbsp;&nbsp;&nbsp;</div>
+		            </div> 
+ 
+
+  </div>
+		
+</div>
+
+	</div>
+
+</div>
+
+</div>
+</div>
+
+
+</div>
+</div>
+</div>
+<!--  End step 1 -->
+
+<div class="tab-pane" id="step2">
+
+<h4 class="info-text"> How much your Property is Beautiful ? </h4>
+<div class="row">
+	<div class="col-sm-12">
+<div class="col-sm-8">
+<div class="form-group">
+<label class="" for="exampleInputAmount" style="">Address</label>	
+<input  placeholder="Enter your address"
+              type="text"  name="address"  class="form-control">
+</div>
+</div>	
+<div class="col-sm-4">
+<div class="form-group">
+	<label class="" for="exampleInputAmount" style="">Apt</label>
+	<input type="text"   name="apt"  class="form-control" placeholder="Apt No">
+</div>
+</div>
+
+</div>
+<div class="col-sm-12">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Country</label>	
+ <?php
+         $sql3="select * from countries where country_id='101'";
+         $sql_row3=mysqli_query($con,$sql3);
+         
+
+         ?>
+
+              <select class="form-control" name="country" id="country">
+    
+   
+   <?php 
+        $row_country=mysqli_fetch_assoc($sql_row3 );
+
+            echo '<option value="'.$row_country['country_id'].'">'.$row_country['name'].'</option>';
+        
+    
+    
+   ?>
+</select>
+
+</div>	
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label style="">State</label>
+ <?php
+         $sql_state="select * from states where country_id='101'";
+         $data_state=mysqli_query($con,$sql_state);
+
+         ?>	
+<select class="form-control" id="state" name="state" onchange="cites();">
+        <option value="">Select State</option>
+          <?php 
+        while($row_state=mysqli_fetch_assoc($data_state ))
+{ 
+            echo '<option value="'.$row_state['state_id'].'">'.$row_state['name'].'</option>';
+        
+    
+    }
+   ?>
+    </select>
+</div>	
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label  style="">City</label>
+<select class="form-control"  name="city" id="city">
+        <option value="">Select City</option>
+    </select>	
+</div>	
+</div>
+</div>
+
+
+<div class="col-sm-12">
+<div class="col-sm-6">
+<div class="form-group">
+	<label class="" for="exampleInputAmount" style="">Monthly Rent</label>
+    <div class="input-group">
+      <div class="input-group-addon" style="border: 1px solid #83838342!important">$</div>
+
+<input type="text" name="monthlyrent" class="form-control" placeholder="Enter Amount"></div>
+</div>
+
+</div>
+
+
+<div class="col-sm-6">
+<div class="form-group">
+	<label class="" for="exampleInputAmount" style="">Security Deposit</label>
+    <div class="input-group">
+      <div class="input-group-addon" style="border: 1px solid #83838342!important">$</div>
+
+<input type="text" name="securitydeposit" class="form-control" placeholder="Enter Amount"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Room Type</p>
+
+<?php
+$sql_roomtype = mysqli_query($con,"SELECT * FROM roomtype");
+
+?>
+<?php
+while($row_roomtype = mysqli_fetch_assoc($sql_roomtype)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+<label>
+<input type="checkbox" value="<?php echo $row_roomtype['id'];?>" name="roomtype">
+
+<?php echo $row_roomtype['roomtype'];?>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Bathroom</p>
+
+<?php
+$sql_bathroom = mysqli_query($con,"SELECT * FROM bathroom");
+
+?>
+<?php
+while($row_bathroom = mysqli_fetch_assoc($sql_bathroom)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+<label>
+<input type="checkbox" value="<?php echo $row_bathroom['id'];?>" name="roomtype">
+
+<?php echo $row_bathroom['bathroom'];?>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+</div>
+
+
+
+<div id="roommatediv"  style="display:none">
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Roommate should be  or  roommates.</p>
+
+<?php
+$sql_room = mysqli_query($con,"SELECT * FROM roomfor");
+
+?>
+<?php
+while($row_room = mysqli_fetch_assoc($sql_room)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+<label>
+<input type="checkbox" value="<?php echo $row_room['id'];?>" name="roomfor">
+
+<?php echo $row_room['roomfor'];?>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Ideal roommate</p>
+
+<?php
+$sql_ideal = mysqli_query($con,"SELECT * FROM roommate_idealperson");
+
+?>  
+<?php
+while($row_ideal = mysqli_fetch_assoc($sql_ideal)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+<label>
+<input type="checkbox" value="<?php echo $row_ideal['id'];?>" name="idealroommate">
+
+<?php echo $row_ideal['roommate_idealperson'];?>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<div class="col-sm-6">
+
+<div class="form-group">
+<label for="property-geo">What Are Do?</label>
+<input type="text" name="occupaton_do"  class="form-control" placeholder="What Are Do?"> 
+</div>
+</div> 
+ 
+ <div class="col-sm-6">
+
+<div class="form-group">
+<label for="property-geo">Where From?</label>
+<input type="text" name="collegename"  class="form-control" placeholder="Where From?"> 
+</div>
+</div>
+
+</div> 
+
+
+</div>
+
+<div id="postroomdiv"  style="display:none">
+	
+<div class="col-sm-12 padding-top-15"> <p style="color: orange;">Room For</p>
+<?php
+$sql_postroom_roomfor = mysqli_query($con,"SELECT * FROM postroom_roomfor");
+
+?>  
+
+<?php
+while($row_post_roomfor = mysqli_fetch_assoc($sql_postroom_roomfor)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+
+<label>
+<input type="checkbox" value="<?php echo $row_post_roomfor['id'];?>" name="interest_gender">
+
+<?php echo $row_post_roomfor['postroom_roomfor'];?>
+</label>
+
+
+
+</div>     
+</div>
+</div>
+<?php }?>
+</div>
+</div>
+
+
+
+<div class="col-sm-12 padding-top-15">
+
+<div class="col-sm-6 ">
+<div class="form-group">
+<label for="property-geo">Room Availability Now</label>
+<input type="text"  name="movedate" class="form-control nowround" placeholder="Now" value="<?php echo date("d-m-Y");?>">
+</div>
+</div> 
+
+<div class="col-sm-6 ">
+<div class="form-group">
+<label for="property-geo">Upcoming Room Availability From</label>
+<input type="text" id="datepicker" name="movedate" class="form-control moveround" placeholder="from">
+</div>
+</div>  
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Amenities.</p>
+
+<?php
+$sql_amenities =mysqli_query($con,"select * from amenities") or die(mysqli_error($con));
+
+?>
+<?php while($row_amenities = mysqli_fetch_assoc($sql_amenities)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+<label  id="amenities<?php echo $row_amenities['id'];?>" lang="<?php echo $row_amenities['id'];?>"  onclick="checkIcon(this)">
+
+ <i class="<?php echo $row_amenities['faclass'];?>" style="color:#999"></i>
+ 
+
+  
+<span  style="color:#999">
+<?php echo $row_amenities['amenities'];?>
+</span>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+<input type="hidden" class="getmutiplevalue" id="selectedAmenities" name="amenities[]">
+
+<script type="text/javascript">
+	
+	function checkIcon(elm)
+	{      
+		var x = elm.innerHTML;
+
+		if(x.indexOf('color:#999') != -1)
+		{
+			
+			x = x.replace('color:#999','color:#FDC600');
+		
+			x = x.replace('color:#999','color:#FDC600');
+		   
+			var t = document.getElementById('selectedAmenities').value;
+			t = t+"-"+elm.lang+"-,";
+		}
+		else
+		{
+	
+			x = x.replace('color:#FDC600','color:#999');
+		
+			x = x.replace('color:#FDC600','color:#999');
+		
+
+			var t = document.getElementById('selectedAmenities').value;
+			var toRemove = '-'+elm.lang+'-,';
+			t = t.replace(toRemove,'');
+
+		}
+		elm.innerHTML = x;
+		document.getElementById('selectedAmenities').value = t;
+
+	}
+
+  // function checkRoomforIcon(elm)
+  // {      
+  //   var x = elm.innerHTML;
+
+  //   if(x.indexOf('color:#999') != -1)
+  //   {
+      
+  //     x = x.replace('color:#999','color:#FDC600');
+    
+  //     x = x.replace('color:#999','color:#FDC600');
+       
+  //     var t = document.getElementById('selectedRoomfor').value;
+  //     t = t+"-"+elm.lang+"-,";
+  //   }
+  //   else
+  //   {
+  
+  //     x = x.replace('color:#FDC600','color:#999');
+    
+  //     x = x.replace('color:#FDC600','color:#999');
+    
+
+  //     var t = document.getElementById('selectedRoomfor').value;
+  //     var toRemove = '-'+elm.lang+'-,';
+  //     t = t.replace(toRemove,'');
+
+  //   }
+  //   elm.innerHTML = x;
+  //   document.getElementById('selectedRoomfor').value = t;
+
+  // }
+
+  // function checkIdealIcon(elm)
+  // {      
+  //   var x = elm.innerHTML;
+
+  //   if(x.indexOf('color:#999') != -1)
+  //   {
+      
+  //     x = x.replace('color:#999','color:#FDC600');
+    
+  //     x = x.replace('color:#999','color:#FDC600');
+       
+  //     var t = document.getElementById('selectedroommate').value;
+  //     t = t+"-"+elm.lang+"-,";
+  //   }
+  //   else
+  //   {
+  
+  //     x = x.replace('color:#FDC600','color:#999');
+    
+  //     x = x.replace('color:#FDC600','color:#999');
+    
+
+  //     var t = document.getElementById('selectedroommate').value;
+  //     var toRemove = '-'+elm.lang+'-,';
+  //     t = t.replace(toRemove,'');
+
+  //   }
+  //   elm.innerHTML = x;
+  //   document.getElementById('selectedroommate').value = t;
+
+  // }
+
+</script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> 
+<script>
+  $(function() {
+    $( "#datepicker" ).datepicker({ minDate: 0});
+  });
+  </script>
+
+
+</div>
+
+<div class="col-sm-12 padding-top-15">
+<p style="color: orange;">Rules.</p>
+
+<?php
+$sql_rule =mysqli_query($con,"select * from rules") or die(mysqli_error($con));
+
+?>
+<script type="text/javascript">
+	
+	function checkRuleIcon(elm)
+	{      
+		var x = elm.innerHTML;
+
+		if(x.indexOf('color:#999') != -1)
+		{
+			
+			x = x.replace('color:#999','color:#FDC600');
+		
+			x = x.replace('color:#999','color:#FDC600');
+		
+			var t = document.getElementById('selectedRules').value;
+			t = t+"-"+elm.lang+"-,";
+		}
+		else
+		{
+	
+			x = x.replace('color:#FDC600','color:#999');
+		
+			x = x.replace('color:#FDC600','color:#999');
+		
+
+			var t = document.getElementById('selectedRules').value;
+			var toRemove = '-'+elm.lang+'-,';
+			t = t.replace(toRemove,'');
+
+		}
+		elm.innerHTML = x;
+		document.getElementById('selectedRules').value = t;
+
+	}
+</script>
+<input type="hidden" id="selectedRules"  name="rules[]">
+<?php while($row_rules = mysqli_fetch_assoc($sql_rule)){?>
+<div class="col-sm-3">
+<div class="form-group">
+<div class="checkbox">
+	<label  id="rules<?php echo $row_rules['id'];?>" lang="<?php echo $row_rules['id'];?>"  onclick="checkRuleIcon(this)">
+
+ <i class="<?php echo $row_rules['faclass'];?>" style="color:#999"></i>
+
+<span  style="color:#999">
+<?php echo $row_rules['rules'];?>
+</span>
+</label>
+</div>
+</div>
+</div> 
+
+<?php }?>
+
+</div>
+
+
+</div>
+</div>
+<!-- End step 2 -->
+
+<div class="tab-pane" id="step3">                                        
+<h4 class="info-text">Add Location in Maps </h4>
+<div class="row">  
+<div class="col-sm-12">
+<div class="pac-card" id="pac-card">
+
+<div id="pac-container">
+<input id="pac-input" type="text"
+placeholder="Enter a location">
+</div>
+</div>
+<div id="map" style="height:400px"></div>
+<div id="infowindow-content">
+<img src="" width="16" height="16" id="place-icon">
+<span id="place-name"  class="title"></span><br>
+<span id="place-address"></span>
+</div>
+</div>
+
+<div class="col-sm-12">
+<div class="col-sm-6">
+
+<div class="form-group">
+<label for="property-images">latitude</label>
+<input type="text"  id="value_latitude" class="form-control" name="latitude" >
+</div>
+</div>
+
+<div class="col-sm-6">
+
+<div class="form-group">
+<label for="property-images">longitude</label>
+<input type="text"   id="value_longitude" class="form-control" name="longitude" >
+</div>
+</div>
+
+</div>
+
+
+</div>
+</div>
+
+
+<div class="tab-pane" id="step4">                                        
+<h4 class="info-text"> Finished and submit </h4>
+
+
+<div class="row">  
+
+  
+<div class="col-sm-12"> 
+<div class="form-group">
+<label>Property Description :</label>
+
+<textarea id = "desc" name="description" class="form-control" rows="8"></textarea>
+</div> 
+</div> 
+</div>
+ 
+
+
+
+
+</div>
+<!--  End step 3 -->
+
+</div>
+
+<div class="wizard-footer">
+<div class="pull-right">
+<input type='button' class='btn btn-next btn-primary' name='next' value='Next' />
+<input type='submit' class='btn btn-finish btn-primary ' name='submit' value='Finish' />
+</div>
+
+<div class="pull-left">
+<input type='button' class='btn btn-previous btn-default' name='previous' value='Previous' />
+</div>
+<div class="clearfix"></div>                                            
+</div>  
+</form>
+</div>
+<!-- End submit form -->
+</div> 
+</div>
+</div>
+</div>
+
+
+<?php
+include("common/footer.php");
+?>
+
+<script type="text/javascript">
+$(document).ready(function(){
+$('#<?php echo $_GET['type'];?>div').show();
+
+});
+</script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> 
+<script>
+  $( function() {
+    $( "#datepicker" ).datepicker({
+  changeMonth: true,
+      changeYear: true, 
+    dateFormat: "dd/mm/yy",
+    
+    minDate: 0
+
+  } );
+  } );
+  </script>
+
+<script>
+function initMap() {
+var map = new google.maps.Map(document.getElementById('map'), {
+center: {lat: 28.644800, lng: 7.216721},
+zoom: 13
+});
+google.maps.event.addListener(map, 'click', function(event) {
+placeMarker(map, event.latLng);
+});
+
+var input = document.getElementById('pac-input');
+var autocomplete = new google.maps.places.Autocomplete(input);
+autocomplete.bindTo('bounds', map);
+
+var infowindow = new google.maps.InfoWindow();
+var infowindowContent = document.getElementById('infowindow-content');
+infowindow.setContent(infowindowContent);
+var marker = new google.maps.Marker({
+map: map,
+anchorPoint: new google.maps.Point(0, -29)
+});
+autocomplete.addListener('place_changed', function() {
+infowindow.close();
+marker.setVisible(false);
+var place = autocomplete.getPlace();
+if (!place.geometry) {
+
+window.alert("No details available for input: '" + place.name + "'");
+return;
+}
+
+
+if (place.geometry.viewport) {
+map.fitBounds(place.geometry.viewport);
+} else {
+map.setCenter(place.geometry.location);
+map.setZoom(17);  // Why 17? Because it looks good.
+}
+marker.setPosition(place.geometry.location);
+//        marker.setVisible(true);
+
+var address = '';
+if (place.address_components) {
+address = [
+(place.address_components[0] && place.address_components[0].short_name || ''),
+(place.address_components[1] && place.address_components[1].short_name || ''),
+(place.address_components[2] && place.address_components[2].short_name || '')
+].join(' ');
+}
+
+infowindowContent.children['place-icon'].src = place.icon;
+infowindowContent.children['place-name'].textContent = place.name;
+infowindowContent.children['place-address'].textContent = address;
+//          infowindow.open(map, marker);
+});
+
+var marker;
+
+function placeMarker(map, location) {
+
+if(marker)
+{
+marker.setMap(null);
+}
+marker = new google.maps.Marker({
+position: location,
+map: map
+});
+var latitude  = location.lat();
+
+var longitude  = location.lng();
+
+var latitude_value = document.getElementById("value_latitude").value=latitude;
+var longitude_value = document.getElementById("value_longitude").value=longitude;
+var infowindow = new google.maps.InfoWindow({
+//content: 'Latitude: ' + location.lat() + '<br>Longitude: ' + location.lng()
+});
+infowindow.open(map,marker);
+}
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDAxe7QaQY_urREwkpqOTkcHsXkzNnzb8&libraries=places&callback=initMap"
+async defer></script>
+
+
+
+
+<script language="javascript" type="text/javascript">
+
+var imagesPreview = function(input, div) {
+
+if (input.files) {
+var filesAmount = input.files.length;
+
+for (i = 0; i < filesAmount; i++) {
+var reader = new FileReader();
+
+reader.onload = function(event) {
+
+  var html = '<div style="position:relative;background:transparent url(\''+event.target.result+'\') no-repeat scroll center center;background-size:cover;margin-right:20px;padding:0px !important;display:inline-block" class="fileupbutton"><div class="closeButton" onclick="$(this).parent().remove();"><i class="fa fa-close"></i></div></div>';
+  var temp = div.split(".");
+  var x = document.getElementsByClassName(temp[1]);
+  console.log(x);
+  console.log(x[0].innerHTML);
+  var currentHTML = x[0].innerHTML;
+  currentHTML = currentHTML+html;
+  x[0].insertAdjacentHTML('afterBegin',html);
+//  var t = $($.parseHTML('<img style="border:5px #999 solid;border-radius:3px;max-height:150px !important;height:150px;margin-right:20px;" height="200px">')).attr('src', event.target.result);
+ // console.log(t);
+  //t.appendTo(div);
+}
+
+reader.readAsDataURL(input.files[i]);
+}
+}
+
+};
+
+$('#uploadimage').on('change', function() {
+imagesPreview(this, 'div.gallery');
+});
+$('#bathroomimage').on('change', function() {
+imagesPreview(this, 'div.gallery2');
+});
+$('#bedimage').on('change', function() {
+imagesPreview(this, 'div.gallery3');
+});$('#kitchenimage').on('change', function() {
+imagesPreview(this, 'div.gallery4');
+});$('#balconyimage').on('change', function() {
+imagesPreview(this, 'div.gallery5');
+});
+
+var id;
+function checked(id)
+{
+	console.log(id);
+    document.getElementById(id).style.background = "aqua";
+
+}
+
+ function showDiv(thechosenone)
+
+ {
+     $('.abc').each(function(index) {
+          if ($(this).attr("id") == thechosenone) {
+               $(this).fadeIn("slow");
+               
+          }
+          else {
+               $(this).fadeOut("slow");
+          }
+     });
+}
+</script> 
+
+<script language="javascript" type="text/javascript">
+
+function showCity(state_id)
+{
+document.frm.submit();
+}
+</script>
+
+
+ 
+ 
+ <script type="text/javascript"> 
+
+ function cites()
+ {
+  var stateID = $('#state').val();
+  //alert(stateID);
+        
+            $.ajax({
+                type:'POST',
+                url:'ajax/logic.php',
+                data:'state_id='+stateID,
+                success:function(html){
+                    $('#city').html(html);
+                   
+                }
+            });
+            }
+
+            function playSound(sound)
+            {
+              var audio = new Audio(sound);
+audio.play();
+            }
+
+        </script>
+        
+        
+search_listroom.php
+
+
+<?php
+include("../common/config.php");
+$carasoul = 1;
+include("../common/header.php");
+?>
+
+<?php
+error_reporting(E_ALL);
+         $city = $_POST['city'];
+         $type = $_POST['type'];
+
+         $city = htmlspecialchars($city); 
+    $city_query = mysqli_fetch_array(mysqli_query($con,"SELECT * FROM cities
+            WHERE (`name` LIKE '%".$city."%')")) or die(mysqli_error($con));
+        $new = $city_query['id'];
+?><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+ <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet"> 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+   <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <!-- Custom CSS -->
+     <script src = "jquery.range.js"></script>
+    <!-- <link href="../css/style.css" rel="stylesheet"> -->
+    <link href="jquery.range.css" rel="stylesheet">
+
+      <style type="text/css">
+       .box-btn {
+  
+  background: transparent;
+  font-size: 33px;
+  color: #4D4E56;
+  font-weight: 100;
+  cursor: pointer;
+  border-radius: 2px;
+  line-height: 0.5;
+  border: none;
+  outline: none;
+}
+.glyphicon {
+  transition: color .3s linear;
+}  
+.box-btn .red {
+  color: red;
+} 
+
+.search_box{
+  width: 102.2%;
+  background: #fff;
+}
+.search_box{
+  width: 102.2%;
+  background: #fff;
+  overflow-x:hidden;
+  overflow-y:scroll;
+  max-height: 300px;
+  border:1px #ddd solid;
+  display: none;
+
+}
+.search_box ul{
+  list-style: none !important;
+  padding: 0px;
+  width: 100%;
+  margin-left: 1px;
+}
+.search_box ul li{
+  padding: 5px 10px;
+  border-bottom:1px #ddd solid;
+  background: #fff;
+  text-align: left;
+}
+.search_box ul li:hover{
+  background: #f9f2db;
+}
+.search_box ul li a{
+  text-decoration: none;
+}
+
+#morehide{
+  float: right;margin-bottom: 55px !important;
+}
+
+
+    </style>
+
+
+<div id="map1" style="color: #24e2c6;min-height: 250px; width: 100% !important;"> 
+            
+          
+                
+</div>
+ 
+  <div class="properties-area recent-property" style="background-color: #FFF;">
+            <div class="container">  
+                <div class="row" style="margin-left:-100px!important">
+                     
+                <div class="col-md-3 p0 padding-top-40">
+                   <button><a href="http://103.10.234.192/~tirbhinnat/roomies/roommate/search_profile.php?city=<?php echo $city;?>">Hunting People </a></button>
+                    <div class="blog-asside-right pr0">
+
+                        <div class="panel panel-default sidebar-menu wow fadeInRight animated" style="padding:10px;" >
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Apply Filter</h3>
+                            </div>
+                            <div class="panel-body search-widget">
+                                
+                                    <fieldset class="padding-5">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                               
+                                                 <input type="hidden" class="price_range" value="0,10000">                                               
+                                            </div>
+                                                                                       
+                                        </div>
+                                    </fieldset> 
+
+
+                                   
+<br/><br/>
+
+
+                                     <fieldset>
+                                      
+<div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+                                        Room Availability
+                                        
+                                      </div>
+
+                                              
+                                          
+    
+        <select id="avltype" class="form-control" onchange="if(this.value == ''){$('#avldate').show();} else {$('#avldate').hide();}">
+          <option value="<?php echo date("Y-m-d");?>">Currently Available</option>
+          <option value="">Selected Date</option>
+        </select>
+        <br/>
+        <br/>
+
+        <div id="avldate" style="display:none">
+          Available From
+          <br/><br/>
+                <input type="date"  class="form-control" id="avldateVal">
+</div>
+                                                
+                                            
+                                    </fieldset> 
+
+                               
+<br/><br/>
+                                    <fieldset class="padding-5">
+                                      <div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+                                        Room Type
+                                        
+                                      </div>
+                                       <br/>
+                                    <table>
+                                        
+                                         
+                                          <?php
+                    $query = "select distinct(roomtype),id from roomtype";  
+                    $rs = mysqli_query($con,$query) or die(mysqli_error($con));
+                    while($roomtype_data = mysqli_fetch_assoc($rs)){
+                
+                ?>
+                                         
+                                               <tr>
+                                        <td style="width:30px;"><input type="checkbox" id="chk" class="item_filter roomtype" value="<?php echo $roomtype_data['id']; ?>"  ></td>
+                                        <td>
+                                          <?php echo $roomtype_data['roomtype']; ?>
+                                        </td>
+                                      </tr> 
+                                             
+                                                   
+                                         
+ <?php } ?>  
+                    
+                    
+                                                 
+                                    </table>
+
+                                                                                       
+                                     
+                                    </fieldset>
+
+       
+               <input type="hidden" id="type" value="<?php echo $type;?>"> 
+
+   <div id="type_postroom">
+               <fieldset class="padding-5">
+                   <div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+                                        Room For
+                                        
+                                      </div>
+                                       <br/>
+                                    <table>
+
+                <?php
+                    $postroom_roomfor = "select distinct(postroom_roomfor),id from postroom_roomfor";  
+                    $rs = mysqli_query($con,$postroom_roomfor) or die(mysqli_error($con));
+                    while($postroom_roomfor_data = mysqli_fetch_assoc($rs)){
+                
+                ?>
+
+
+                        <tr>
+                                        <td style="width:30px;"> <input type="checkbox"  class="item_filter postroom_roomfor" value="<?php echo $postroom_roomfor_data['id']; ?>"></td>
+                                         <td>
+                                         <?php echo $postroom_roomfor_data['postroom_roomfor']; ?>
+                                        </td>
+                       </tr> 
+                   
+                     <?php } ?>  </table>
+               </fieldset>
+                
+    </div>
+
+
+<div id="roommate_roomfor">
+              
+              <fieldset>
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                              <label> Enter College/School Name</label>
+      
+           
+               <input type="text" id="getcollegeEnter" class="form-control" placeholder="Enter College/School Name">   
+                <div class="search_box" id="search_box"></div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+             <fieldset class="padding-5">
+                   <div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+
+               Room For
+                </div>
+                                       <br/>
+                                    <table>
+ <?php
+                    $roomfor_query = "select distinct(roomfor),id from roomfor";  
+                    $data_roomfor = mysqli_query($con,$roomfor_query) or die(mysqli_error($con));
+                    while($roomfor_data = mysqli_fetch_assoc($data_roomfor)){
+                
+                ?>
+                     <tr>
+                    <td style="width:30px;">
+                    <input type="checkbox" id="roommate_student" class="item_filter roommate_roomfor" value="<?php echo $roomfor_data['id'];?>"></td>
+                   <td>
+
+                    <?php echo $roomfor_data['roomfor'];?> </td>
+                   </tr>
+                    <?php }?> </table>
+              </fieldset>
+
+              
+
+               <fieldset class="padding-5">
+                       <div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+
+          
+                Ideal Roommate
+                      
+                 </div>
+<br/>
+                                    <table>
+                      <?php
+                    $roommate_ideal_query = "SELECT distinct(roommate_idealperson),id FROM roommate_idealperson";  
+                    $rs = mysqli_query($con,$roommate_ideal_query) or die(mysqli_error($con));
+                    while($roommate_idealperson_data = mysqli_fetch_assoc($rs)){
+                
+                ?>
+                   <tr>
+                    <td style="width:30px;">
+                    
+                    <input type="checkbox" id="chk" class="item_filter roommate_ideal" value="<?php echo $roommate_idealperson_data['id']; ?>" > </td>
+                     <td><?php echo $roommate_idealperson_data['roommate_idealperson']; ?> </td>
+                     </tr>
+                 <?php } ?></table>
+                                    </fieldset>
+
+               </div>
+ 
+ <!-- Large modal -->
+<button id="morehide" type="button"  class="btn btn-primary" onclick="$('#moreFieldData').fadeIn();">More </button>
+
+<!-- <div style="width:100%;height:1000px;position:fixed;top:0px;left:0px;background:rgba(0,0,0,0.5);display:none;z-index:2000000" id="moreFieldData">
+  <div style="position:fixed:top:20px;right:20px;width:50px;height:50px;text-align:right;z-index:30000000">
+    <button class="btn btn-sm btn-default" onclick="$('#moreFieldData').fadeOut();">Close</button>
+  </div>
+  <center style="padding-top:100px;">
+  <div>
+    <div style="background:#fff;width:50%;padding:20px;border-radius:5px;box-shadow:0px 0px 5px 0px #fff;"> -->
+ <div  style="display: none;" id="moreFieldData">      
+    <fieldset class="padding-5">
+
+
+<div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+                                       Amenities
+                                        
+                                      </div>
+                                       <br/>
+                                    <table>
+
+               
+
+                <?php
+            $query_amenities = "SELECT distinct(amenities),id from amenities ORDER BY id limit 4";  
+            $rs_amenities = mysqli_query($con,$query_amenities) or die(mysqli_error($con));
+                    while($amenities_fetch = mysqli_fetch_assoc($rs_amenities)){
+                
+                ?>
+
+                 <tr>
+                                        <td style="width:30px;"> <input type="checkbox" class="item_filter common_amenities" value="<?php echo $amenities_fetch['id']; ?>"  ></td>
+                                        <td>
+                                        <?php echo $amenities_fetch['amenities']; ?>
+                                        </td>
+                                      </tr> 
+               
+                  
+                   
+                
+<?php } ?> 
+</table>
+                                    </fieldset>
+
+
+
+
+                                    <fieldset class="padding-5">
+
+
+<div style="padding:10px;width:100%;border-bottom:1px #ddd dotted;text-align:left;text-transform:uppercase;font-size:12px;font-weight:bold">
+                                       Rules
+                                        
+                                      </div>
+                                       <br/>
+                                    <table>
+
+               
+
+                <?php
+            $query_rule = "SELECT distinct(rules),id from rules";  
+            $rs_rule = mysqli_query($con,$query_rule) or die(mysqli_error($con));
+                    while($rules_fetch = mysqli_fetch_assoc($rs_rule)){
+                
+                ?>
+
+                 <tr>
+                                        <td style="width:30px;"> <input type="checkbox" class="item_filter common_rule" value="<?php echo $rules_fetch['id']; ?>"  ></td>
+                                        <td>
+                                        <?php echo $rules_fetch['rules']; ?>
+                                        </td>
+                                      </tr> 
+               
+                  
+                   
+                
+<?php } ?> 
+</table>
+                                    </fieldset>
+<button type="button" style="float: right;margin-bottom: 5px;margin-right: 0px;" class="btn btn-primary" onclick="$('#moreFieldData').fadeOut();">Close </button>
+
+</div>
+
+   <script type="text/javascript">
+     
+   </script>
+
+
+ 
+<!-- close popup -->
+
+
+
+
+                                    <fieldset >
+                                        <div class="row">
+                                            <div class="col-xs-12">  
+                                                
+                                                <button class="button btn largesearch-btn" type="button" id="filter" onclick="filterProducts()" >Apply Filter </button>
+                                            </div>  
+                                        </div>
+                                    </fieldset>                                     
+                                
+                            </div>
+                        </div>
+
+                       
+                    </div>
+                </div>
+
+                <div class="col-md-9  pr0 padding-top-40 properties-page">
+                  
+                    <div class="col-md-12 clear" style="width: 110%!important;">
+                     
+                        <div id="list-type" class="proerty-th">
+                            <!-- new design -->
+                            <div class="row product-data">
+
+<?php 
+
+         
+
+
+        $city_query = mysqli_fetch_array(mysqli_query($con,"SELECT * FROM cities
+            WHERE (`name` LIKE '%".$city."%')")) or die(mysqli_error($con));
+        $new = $city_query['id'];
+                  
+               
+        if($type =='postroom'){
+
+
+
+          $queryString = "SELECT amenities.amenities AS Amenities,cities.name AS City,postroom.postroom_id AS Postroom_id,roomtype.roomtype AS Roomtype,bathroom.bathroom AS Bathroom,postroom.monthlyrent AS Rent,postroom.address AS Address,addcustomer.age AS AGE,addcustomer.image AS Image, addcustomer.username AS Username,postroom.movedate AS Movedate,postroom_roomfor.postroom_roomfor AS Interest_gender,postroom.type AS Type,postroom.latitude AS latitude,postroom.longitude AS longitude,postroom.currrentdate AS Postdate FROM `cities`,`roomtype`,`postroom`,`bathroom`,`amenities`,`postroom_roomfor`,`addcustomer`
+WHERE postroom_roomfor.id=postroom.interest_gender  AND addcustomer.id=postroom.user_id AND amenities.id=postroom.amenities AND bathroom.id=postroom.bathroom  AND roomtype.id=postroom.roomtype  AND cities.id=postroom.city AND type='$type' AND (city LIKE '%".$new."%')";
+
+
+          $query = mysqli_query($con,$queryString)or die(mysqli_error($con));
+        }  
+
+        else
+
+        {
+          
+
+
+          $queryString = "SELECT amenities.amenities AS Amenities,cities.name AS City,postroom.postroom_id AS Postroom_id,roomtype.roomtype AS Roomtype,addcustomer.username AS Username,addcustomer.image AS Image,addcustomer.age AS AGE,bathroom.bathroom AS Bathroom,postroom.monthlyrent AS Rent,postroom.address AS Address,roommate_idealperson.roommate_idealperson AS Idealroommate,postroom.movedate AS Movedate,roomfor.roomfor AS Roommate_roomfor,postroom.latitude AS latitude,postroom.longitude AS longitude,postroom.type AS Type,postroom.currrentdate AS Postdate FROM `cities`,`roomtype`,`postroom`,`bathroom`,`roomfor`,`amenities`,`roommate_idealperson`,`addcustomer`
+WHERE roommate_idealperson.id=postroom.idealroommate AND amenities.id=postroom.amenities AND addcustomer.id=postroom.user_id AND  bathroom.id=postroom.bathroom AND roomfor.id=postroom.roomfor AND roomtype.id=postroom.roomtype  AND cities.id=postroom.city AND type='$type' AND (city LIKE '%".$new."%')";
+
+
+
+           $query = mysqli_query($con,$queryString)or die(mysqli_error($con));
+        }  ?>
+
+<?php 
+$lat = array();
+$long = array();
+
+//$rent = array();
+$sql_latlong = mysqli_query($con,$queryString)or die(mysqli_error($con));
+$latlngstring = '';
+$first = '';
+
+while($row_latlong = mysqli_fetch_assoc($sql_latlong)){
+  
+  if($first == '')
+  {
+    $first =  $row_latlong['latitude'].",".$row_latlong['longitude'];
+  }
+  $latlngstring .= "[".$row_latlong['latitude'].",".$row_latlong['longitude']."],";
+  
+
+          
+
+ 
+$rent[] =  $row_latlong['Rent'];  
+    
+}
+
+$latlngstring = substr($latlngstring,0,-1);
+
+
+?>     
+
+                  <?php 
+                     while($results = mysqli_fetch_assoc($query)){
+
+      
+                  ?>
+
+                                <div class="col-sm-6" style="border:1px #ddd solid;">
+
+                                  <div style="padding:10px 10px 0px 10px;text-align:left">
+                                    
+                                  <img src="../assets/img/upload/userprofile/<?php echo $results['Image'];?>" style="border-radius:50%; width: 50px;height: 50px;margin-bottom:5px;">
+                                  <div style="float:right">
+                                                                              <span style="font-size:11px;"><?php echo $results['Postdate'];?></span>
+
+                                  </div>
+                                        <div style="display:inline-block;margin-left:10px;font-size:14px;">
+                                          <?php echo $results['Username'];?>
+                                          <br/>
+                                        <?php echo $results['AGE'];?>
+
+                                        </div>
+                                  </div>
+                               
+                                    <div class="box-two proerty-item">
+
+                                        <div class="item-thumb" style="float: left;width: 100%;">
+                                           
+
+                            
+  <?php $image= array(); $i=0;
+ 
+          $sql=mysqli_query($con,"SELECT * FROM roomimages WHERE type='".$results['Type']."' AND postroom_id='".$results['Postroom_id']."'")or die(mysqli_error($con));
+          while($row1=mysqli_fetch_array($sql)){
+        $count=mysqli_num_rows($sql);
+           $image[$i++]=$row1['uploadimage'];
+           }
+        ?>
+   
+
+<div id="myCarousel<?php echo $results['Postroom_id'];?>" class="carousel slide" data-ride="carousel" style="position:relative">
+  <div style="position:absolute;top:20px;right:20px;z-index:200">
+    
+    <i  class="box-btn" id="wishbtn<?php echo $results['Postroom_id'];?>"   onclick="bookmark('<?php echo $results['Postroom_id'];?>','<?php echo $results['Type'];?>')"><span class="glyphicon glyphicon-heart-empty" ></span>
+</i>
+  
+    
+  </div>
+
+  
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+ <li data-target="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide-to="0" class="active"></li>
+ <?php $imgCount =  sizeof($image);
+              for($i = 1; $i < $imgCount; $i++) {
+            ?>
+
+            <li data-target="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide-to="<?php echo $i;?>"></li>
+           
+
+            <?php } ?>
+
+   
+   
+
+  </ol>
+
+  <!-- Wrapper for slides -->
+  <div class="carousel-inner">
+    <div class="item active">
+    <img   src="../assets/img/roomimages/<?php echo $image[0];?>" />
+    </div>
+
+     <?php $imgCount =  sizeof($image);
+              for($i = 1; $i < $imgCount; $i++) {
+            ?>
+
+              <div class="item">
+      <img src="../assets/img/roomimages/<?php echo $image[$i];?>" alt="Chicago">
+    </div>
+           
+
+            <?php } ?>
+
+  
+
+
+  </div>
+
+  <!-- Left and right controls -->
+  <a class="left carousel-control" href="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+    
+    
+          
+
+ 
+
+
+
+
+
+
+                                        </div>
+
+
+                                        <br/>
+<br/>
+<div style="padding:10px;text-align:left;margin-top:183px;">
+  <div style="float:right;margin-top:10px;">
+    <span>Detail in video</span><i class="fa fa-play-circle" onclick="playVideo('<?php echo $results['Postroom_id'];?>')" style="font-size:25px"></i>
+    <i class="fa fa-map-marker" onclick="streetview('<?php echo $results['Postroom_id'];?>')"  style="color:#222;font-size:20px;"></i>
+  
+  </div>
+<div style="font-size:13px;text-transform:uppercase;margin-top:10px;" onclick="window.location('http://103.10.234.192/~tirbhinnat/roomies/postroom/single_page.php?postid=<?php echo $results['Postroom_id'];?>&type=<?php echo $results['Type'];?>','_blank')">
+<br/><br/>
+
+
+<?php echo $results['City']?>
+
+</div>
+
+<div class="dot-hr" style="margin-top:15px;"></div>
+                                            <!-- <span class="pull-left"> Area : 120m </span> -->
+                                            <span class="proerty-price pull-left"> RS <?php echo $results['Rent'];?>/ Month</span>
+                                            
+                                            <div class="property-icon">
+                                                <img src="../assets/img/icon/bed.png"><?php echo $results['Roomtype']; ?>&nbsp;&nbsp;|
+                                                <img src="../assets/img/icon/shawer.png"><?php echo $results['Bathroom']; ?>
+                                                <!-- <img src="assets/img/icon/cars.png">(1) -->  
+                                            </div>
+
+</div>
+
+                    
+
+                                       
+                                    </div>
+                                </div>
+
+
+<?php  } ?>
+
+                             
+                        </div>
+
+
+
+                            </div><br/><br/>
+                       
+                             
+                              
+                              
+          
+        </div>
+</div>
+<!-- <?php
+//include("../common/footer.php");
+?>  -->
+
+            <script type="text/javascript">
+              $(function() {
+    
+    
+        if($('#type').val() == 'postroom') {
+            $('#type_postroom').show(); 
+            $('#roommate_roomfor').hide();
+            //$('#heading').text("Add a post Room");
+            
+            
+        } 
+
+        else{
+          $('#type_postroom').hide(); 
+            $('#roommate_roomfor').show(); 
+        }
+   
+});
+
+            </script>   
+
+                
+
+            
+
+    <div style="position:fixed;top:0px;left:0px;width:100%;height:2000px;background:rgba(0,0,0,0.7);display:none" id="vdBox">
+      <center>
+        <div style="position:absolute;top:20px;right:20px;">
+          <button class="btn btn-danger" onclick="$('#vdBox').fadeOut();document.getElementById('vdframe').src = ''">CLOSE</button>
+        </div>
+        <br/><br/><br/>
+        <div style="width:80%;border:5px #fff solid;border-radius:5px;box-shadow:0px 0px 5px 3px #fff;">
+
+          <iframe src="#" id="vdframe" style="width:100%;height:500px;" scrolling="no" frameborder="0"></iframe>
+          
+        </div>
+      </center>
+    </div>
+
+
+    <div style="position:fixed;top:0px;left:0px;width:100%;height:2000px;background:rgba(0,0,0,0.7);display:none" id="mpBox">
+      <center>
+        <div style="position:absolute;top:20px;right:20px;">
+          <button class="btn btn-danger" onclick="$('#mpBox').fadeOut();document.getElementById('mpframe').src = ''">CLOSE</button>
+        </div>
+        <br/><br/><br/>
+        <div style="width:80%;border:5px #fff solid;border-radius:5px;box-shadow:0px 0px 5px 3px #fff;">
+
+          <iframe src="#" id="mpframe" style="width:100%;height:500px;" scrolling="no" frameborder="0"></iframe>
+          
+        </div>
+      </center>
+    </div>
+   
+    
+   <script type="text/javascript">
+
+    function playVideo(id)
+    {
+      document.getElementById('vdframe').src = "video.php?id="+id;
+      $('#vdBox').fadeIn();
+    }
+    function streetview(id)
+    {
+      document.getElementById('mpframe').src = "streetview.php?id="+id;
+      $('#mpBox').fadeIn();
+    }
+
+ function filterProducts() {
+            
+  var city = <?php echo $new;?>;
+   var type = '<?php echo $type;?>';
+   
+ 
+    var collegename,amenities_tv,amenities_wifi,amenities_gym,amenities_electricity,roomtype,price_range,postroom_boy,postroom_girl,postroom_family,postroom_anyone,data,roommate_student,roommate_jobperson,roommate_nomatter,roommate_male,roommate_female,roommate_either;
+    
+    
+
+          price_range = $('.price_range').val();
+
+          collegename = $('#getcollegeEnter').val();
+          roomtype = multiple_values('roomtype');
+             
+
+            
+             amenities_tv = multiple_values('common_amenities');
+             amenities_wifi = multiple_values('common_amenities');
+             amenities_gym = multiple_values('common_amenities');
+             amenities_electricity = multiple_values('common_amenities');
+
+
+
+             postroom_boy = multiple_values('postroom_roomfor');
+             postroom_girl = multiple_values('postroom_roomfor');
+             postroom_family = multiple_values('postroom_roomfor');
+             postroom_anyone = multiple_values('postroom_roomfor');
+
+            
+
+             roommate_student = multiple_values('roommate_roomfor');
+             roommate_jobperson = multiple_values('roommate_roomfor');
+             roommate_nomatter = multiple_values('roommate_roomfor');
+
+             roommate_male = multiple_values('roommate_ideal');
+             roommate_female = multiple_values('roommate_ideal');
+             roommate_either = multiple_values('roommate_ideal');
+
+             var avltype = document.getElementById('avltype').value;
+             var avldate = document.getElementById('avldateVal').value;
+              
+        if (type == 'postroom') {
+    
+    data = {city:city,type:type,roomtype:roomtype,price_range:price_range,postroom_boy:postroom_boy,postroom_girl:postroom_girl,postroom_family:postroom_family,postroom_anyone:postroom_anyone,avltype:avltype,avldate:avldate,amenities_tv:amenities_tv,amenities_wifi:amenities_wifi,amenities_gym:amenities_gym,amenities_electricity:amenities_electricity};
+} else {
+    
+    data =  {city:city,type:type,roomtype:roomtype,price_range:price_range,roommate_student:roommate_student,roommate_jobperson:roommate_jobperson,roommate_nomatter:roommate_nomatter,roommate_male:roommate_male,roommate_female:roommate_female,roommate_either:roommate_either,avltype:avltype,avldate:avldate,amenities_tv:amenities_tv,amenities_wifi:amenities_wifi,amenities_gym:amenities_gym,amenities_electricity:amenities_electricity,collegename:collegename};
+}
+            
+            $.ajax({
+                url:"ajax.php",
+                type:'post',
+                data:data,
+
+            beforeSend: function () {
+            
+        },
+                success:function(result){
+                    
+                      $('.product-data').html(result);
+                    var result = document.getElementById("map").value;
+                   
+
+                    
+                }
+            });
+
+    }
+  
+    function multiple_values(inputclass){
+        var val = new Array();
+        $("."+inputclass+":checked").each(function() {
+            val.push($(this).val());
+
+        });
+        return val;
+    }
+    
+$(function() {
+$('.price_range').jRange({
+    from: 0,
+    to: 10000,
+    step: 50,
+    format: '$%s USD',
+    width: 250,
+    showLabels: true,
+    isRange : true
+});
+});
+  
+</script>
+
+<script type="text/javascript">
+
+function bookmark(id,type) { 
+   
+
+var xhttp = new XMLHttpRequest();
+
+var param = "postroom_id="+id+"&type="+type;
+
+
+console.log(param);
+
+
+
+xhttp.onreadystatechange = function() {//Call a function when the state changes.
+
+   if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("wishbtn"+id).innerHTML = this.responseText;
+      
+    }
+};
+
+xhttp.open("POST", "http://103.10.234.192/~tirbhinnat/roomies/postroom/addtowishlist.php", true);
+xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+xhttp.send(param);
+}
+
+console.error();
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#getcollegeEnter").keyup(function(){
+        var getcollegeEnter = $(this).val();
+        if(getcollegeEnter != "" && getcollegeEnter.length > 2) {
+        $.ajax({
+            type: "POST",
+            url: "gecollegename.php",
+            data: 'getcollegeEnter='+getcollegeEnter,
+            dataType: "html",
+            async: false,
+            // success: function(text){
+            //     $('#search_box').html(text);
+            // }
+            
+            success: function(resp) {
+          if(resp != "") {
+            $("#search_box").html(resp).show();  
+          } else {
+            $("#search_box").html(resp).hide();
+          }
+        }
+        });
+    }
+        else {
+      $("#search_box").html("").hide();
+    }
+
+  });
+
+ 
+    
+});
+function selectCollege(val) {
+$("#getcollegeEnter").val(val);
+$("#search_box").hide();
+}
+</script>
+ 
+<script type="text/javascript">
+var getimage = [];
+var html = [];
+var getprice = [];
+
+<?php
+ 
+
+foreach($rent as $key => $val)
+{
+ 
+?>
+ 
+
+   
+  getprice[<?php echo $rent[$key];?>] = '<?php echo $rent[$key];?>';
+  
+  
+  html[<?php echo $key;?>] = '<div class="col-sm-12"><div style="float:left">'+getprice[<?php echo $rent[$key];?>]+'</div>';
+<?php
+}
+
+?>
+
+
+ var locations = [<?php echo $latlngstring; ?>
+ 
+  ];
+
+function myMap() {
+  var myCenter = new google.maps.LatLng(<?php echo $first;?>);
+  var mapCanvas = document.getElementById("map1");
+  var mapOptions = {center: myCenter, zoom: 14};
+  var map = new google.maps.Map(mapCanvas, mapOptions);
+  setMarkers(map,locations)
+function setMarkers(map,locations){
+
+      var marker, i
+
+for (i = 0; i < locations.length; i++)
+ {  
+
+ 
+ var lat = locations[i][0]
+ var long = locations[i][1]
+ 
+
+ latlngset = new google.maps.LatLng(lat, long);
+var pinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/ms/icons/blue-dot.png");
+  var marker = new google.maps.Marker({  
+          map: map,  position: latlngset,
+          icon: pinImage  
+        });
+var content =  html[i]    
+
+   var infowindow = new google.maps.InfoWindow()
+
+google.maps.event.addListener(marker,'mouseover', (function(marker,content,infowindow){ 
+        return function() {
+           infowindow.setContent(content);
+           infowindow.open(map,marker);
+            
+        };
+    })(marker,content,infowindow));
+google.maps.event.addListener(marker, 'mouseout', (function(marker, content, infowindow) {
+      return function() {
+        infowindow.close();
+      };
+    })(marker, content, infowindow));
+
+
+
+  }
+  }
+
+}
+console.error();
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDAxe7QaQY_urREwkpqOTkcHsXkzNnzb8&callback=myMap"></script>
+
+ajax.php
+
+<?php
+include("../common/config.php");
+error_reporting(E_ALL);
+$city="";
+$type="";
+$roomtype="";
+$price_range="";
+
+   
+$collegename = isset($_POST['collegename'])?$_POST['collegename']:"";
+
+$city = isset($_POST['city'])?$_POST['city']:"";
+$type = isset($_POST['type'])?$_POST['type']:"";
+$roomtype = isset($_POST['roomtype'])?$_POST['roomtype']:"";
+$price_range = isset($_POST['price_range'])?$_POST['price_range']:"";
+
+
+$amenities_tv = isset($_POST['amenities_tv'])?$_POST['amenities_tv']:"";
+$amenities_wifi = isset($_POST['amenities_wifi'])?$_POST['amenities_wifi']:"";
+$amenities_gym = isset($_POST['amenities_gym'])?$_POST['amenities_gym']:"";
+$amenities_electricity = isset($_POST['amenities_electricity'])?$_POST['amenities_electricity']:"";
+
+
+
+$postroom_boy="";
+$postroom_girl="";
+$postroom_family="";
+$postroom_anyone="";
+
+$postroom_boy = isset($_POST['postroom_boy'])?$_POST['postroom_boy']:"";
+$postroom_girl = isset($_POST['postroom_girl'])?$_POST['postroom_girl']:"";
+$postroom_family = isset($_POST['postroom_family'])?$_POST['postroom_family']:"";
+$postroom_anyone = isset($_POST['postroom_anyone'])?$_POST['postroom_anyone']:"";
+
+
+$roommate_student="";
+$roommate_jobperson="";
+$roommate_nomatter="";
+
+$roommate_student = isset($_POST['roommate_student'])?$_POST['roommate_student']:"";
+$roommate_jobperson = isset($_POST['roommate_jobperson'])?$_POST['roommate_jobperson']:"";
+$roommate_nomatter = isset($_POST['roommate_nomatter'])?$_POST['roommate_nomatter']:"";
+
+
+$roommate_male="";
+$roommate_female="";
+$roommate_either="";
+
+$roommate_male = isset($_POST['roommate_male'])?$_POST['roommate_male']:"";
+$roommate_female = isset($_POST['roommate_female'])?$_POST['roommate_female']:"";
+$roommate_either = isset($_POST['roommate_either'])?$_POST['roommate_either']:"";
+
+$avldate = isset($_POST['avldate'])?$_POST['avldate']:"";
+
+
+
+if($_POST['avltype']!= '')
+{
+  $avldate = date("Y-m-d");
+}
+
+if($type=='postroom'){
+$query = "SELECT amenities.amenities AS Amenities, cities.name AS City,postroom.postroom_id AS Postroom_id,roomtype.roomtype AS Roomtype,bathroom.bathroom AS Bathroom,addcustomer.age AS AGE,addcustomer.image AS Image, addcustomer.username AS Username,postroom.monthlyrent AS Rent,postroom.user_id AS User_id,postroom.address AS Address,postroom_roomfor.postroom_roomfor AS Interest_gender,postroom.type AS Type,postroom.movedate AS Movedate,postroom.latitude AS latitude,postroom.longitude AS longitude,postroom.currrentdate AS Postdate FROM `cities`,`roomtype`,`postroom`,`bathroom`,`amenities`,`postroom_roomfor`,`addcustomer` WHERE postroom_roomfor.id=postroom.interest_gender  AND amenities.id=postroom.amenities AND bathroom.id=postroom.bathroom AND roomtype.id=postroom.roomtype  AND cities.id=postroom.city  AND addcustomer.id=postroom.user_id AND type='$type' AND city='$city'";
+
+}
+else{
+ $query = "SELECT amenities.amenities AS Amenities,cities.name AS City,postroom.postroom_id AS Postroom_id,roomtype.roomtype AS Roomtype,bathroom.bathroom AS Bathroom,addcustomer.age AS AGE,addcustomer.image AS Image, addcustomer.username AS Username,postroom.collegename AS Collegename,postroom.monthlyrent AS Rent,postroom.user_id AS User_id,roomfor.roomfor AS Roommate_roomfor,roommate_idealperson.roommate_idealperson AS Idealroommate,postroom.latitude AS latitude,postroom.longitude AS longitude,postroom.address AS Address,postroom.movedate AS Movedate,postroom.type AS Type,postroom.currrentdate AS Postdate FROM `cities`,`roomtype`,`postroom`,`bathroom`,`roomfor`,`amenities`,`roommate_idealperson`,`addcustomer` WHERE roommate_idealperson.id=postroom.idealroommate AND amenities.id=postroom.amenities AND bathroom.id=postroom.bathroom AND roomfor.id=postroom.roomfor AND roomtype.id=postroom.roomtype  AND addcustomer.id=postroom.user_id AND cities.id=postroom.city AND type='$type' AND city='$city'";
+ }   
+            
+           
+
+					  if(!empty($roomtype)){
+						  $colordata =implode("','",$roomtype);
+						  $query  .= " and postroom.roomtype in('$colordata')"; 
+					  }
+            
+             if(!empty($amenities_tv)){
+              $amenities_tvdata =implode("','",$amenities_tv);
+              $query  .= " and postroom.amenities in('$amenities_tvdata')"; 
+            }
+
+             if(!empty($amenities_wifi)){
+              $amenities_wifidata =implode("','",$amenities_wifi);
+              $query  .= " and postroom.amenities in('$amenities_wifidata')"; 
+            }
+
+             if(!empty($amenities_gym)){
+              $amenities_gymdata =implode("','",$amenities_gym);
+              $query  .= " and postroom.amenities in('$amenities_gymdata')"; 
+            }
+
+             if(!empty($amenities_electricity)){
+              $amenities_electricitydata =implode("','",$amenities_electricity);
+              $query  .= " and postroom.amenities in('$amenities_electricitydata')"; 
+            }
+
+
+            
+					  
+            if(!empty($price_range)){
+        $priceRangeArr = explode(',', $price_range);
+        $query  .= "and postroom.monthlyrent BETWEEN '".$priceRangeArr[0]."' AND '".$priceRangeArr[1]."'";
+        
+        }
+           $query  .= "and postroom.collegename LIKE '%".$collegename."%' ";
+           $query .="and postroom.movedate <='$avldate'";
+            
+            if($type == 'postroom'){
+
+             if(!empty($postroom_boy)){
+                          $postroom_boy_data =implode("','",$postroom_boy);
+                           $query  .= " and postroom.interest_gender in('$postroom_boy_data')"; 
+              }
+
+
+
+        if(!empty($postroom_girl)){
+                          $postroom_girl_data =implode("','",$postroom_girl);
+                           $query  .= " and postroom.interest_gender in('$postroom_girl_data')"; 
+              }
+
+
+                 if(!empty($postroom_family)){
+                          $postroom_family_data =implode("','",$postroom_family);
+                           $query  .= " and postroom.interest_gender in('$postroom_family_data')"; 
+              }
+
+
+               if(!empty($postroom_anyone)){
+                          $postroom_anyone_data =implode("','",$postroom_anyone);
+                           $query  .= " and postroom.interest_gender in('$postroom_anyone_data')"; 
+              }
+             }
+
+             else if($type =='roommate'){ 
+               
+               if(!empty($roommate_student)){
+                          $roommate_student_data =implode("','",$roommate_student);
+                           $query  .= " and postroom.roomfor in('$roommate_student_data')"; 
+              }
+
+
+
+        if(!empty($roommate_jobperson)){
+                          $roommate_jobperson_data =implode("','",$roommate_jobperson);
+                           $query  .= " and postroom.roomfor in('$roommate_jobperson_data')"; 
+              }
+
+
+                 if(!empty($roommate_nomatter)){
+                          $roommate_nomatter_data =implode("','",$roommate_nomatter);
+                           $query  .= " and postroom.roomfor in('$roommate_nomatter_data')"; 
+              }
+
+              if(!empty($roommate_male)){
+                          $roommate_male_data =implode("','",$roommate_male);
+                           $query  .= " and postroom.idealroommate in('$roommate_male_data')"; 
+              }
+
+if(!empty($roommate_female)){
+                          $roommate_female_data =implode("','",$roommate_female);
+                           $query  .= " and postroom.idealroommate in('$roommate_female_data')"; 
+              }
+
+if(!empty($roommate_either)){
+                          $roommate_either_data =implode("','",$roommate_either);
+                           $query  .= " and postroom.idealroommate in('$roommate_either_data')"; 
+              }
+
+                 
+
+             }
+             
+             $querSEND = urlencode($query);
+
+             ?>
+            <div id="map" style="width:70%;height:500px;margin-top: 0px;"></div> 
+            
+            <iframe src="getmap.php?query=<?php echo $querSEND;?>" style="width:100%;height:600px;" scrolling="no" frameborder="0" ></iframe>
+					 
+				     <?php $rs= mysqli_query($con,$query) or die(mysqli_error($con));
+					 
+					 while($results = mysqli_fetch_assoc($rs)){
+                  ?>
+
+<div class="col-sm-6" style="border:1px #ddd solid;">
+
+                                  <div style="padding:10px 10px 0px 10px;text-align:left">
+                                    
+                                  <img src="../assets/img/upload/userprofile/<?php echo $results['Image'];?>" style="border-radius:50%; width: 50px;height: 50px;margin-bottom:5px;">
+                                  <div style="float:right">
+                                                                              <span style="font-size:11px;"><?php echo $results['Postdate'];?></span>
+
+                                  </div>
+                                        <div style="display:inline-block;margin-left:10px;font-size:14px;">
+                                          <?php echo $results['Username'];?>
+                                          <br/>
+                                        <?php echo $results['AGE'];?>
+
+                                        </div>
+                                  </div>
+                               
+                                    <div class="box-two proerty-item">
+
+                                        <div class="item-thumb" style="float: left;width: 100%;">
+                                           
+
+                            
+  <?php $image= array(); $i=0;
+ 
+          $sql=mysqli_query($con,"SELECT * FROM roomimages WHERE type='".$results['Type']."' AND postroom_id='".$results['Postroom_id']."'")or die(mysqli_error($con));
+          while($row1=mysqli_fetch_array($sql)){
+        $count=mysqli_num_rows($sql);
+           $image[$i++]=$row1['uploadimage'];
+           }
+        ?>
+   
+
+<div id="myCarousel<?php echo $results['Postroom_id'];?>" class="carousel slide" data-ride="carousel" style="position:relative">
+  
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+ <li data-target="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide-to="0" class="active"></li>
+ <?php $imgCount =  sizeof($image);
+              for($i = 1; $i < $imgCount; $i++) {
+            ?>
+
+            <li data-target="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide-to="<?php echo $i;?>"></li>
+           
+
+            <?php } ?>
+
+   
+   
+
+  </ol>
+
+  <!-- Wrapper for slides -->
+  <div class="carousel-inner">
+    <div class="item active">
+    <img   src="../assets/img/roomimages/<?php echo $image[0];?>" />
+    </div>
+
+     <?php $imgCount =  sizeof($image);
+              for($i = 1; $i < $imgCount; $i++) {
+            ?>
+
+              <div class="item">
+      <img src="../assets/img/roomimages/<?php echo $image[$i];?>" alt="Chicago">
+    </div>
+           
+
+            <?php } ?>
+
+  
+
+
+  </div>
+
+  <!-- Left and right controls -->
+  <a class="left carousel-control" href="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel<?php echo $results['Postroom_id'];?>" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+    
+    
+          
+
+ 
+
+
+
+
+
+
+                                        </div>
+
+
+                                        <br/>
+<br/>
+<div style="padding:10px;text-align:left;margin-top:183px;">
+  <div style="float:right;margin-top:10px;">
+    <span>Detail in video</span><i class="fa fa-play-circle" onclick="playVideo('<?php echo $results['Postroom_id'];?>')" style="font-size:25px"></i>
+    <i class="fa fa-map-marker" onclick="streetview('<?php echo $results['Postroom_id'];?>')"  style="color:#222;font-size:20px;"></i>
+  
+  </div>
+<div style="font-size:13px;text-transform:uppercase;margin-top:10px;" onclick="window.location('http://103.10.234.192/~tirbhinnat/roomies/postroom/single_page.php?postid=<?php echo $results['Postroom_id'];?>&type=<?php echo $results['Type'];?>','_blank')">
+<br/><br/>
+
+
+<?php echo $results['City']?>
+
+</div>
+
+<div class="dot-hr" style="margin-top:15px;"></div>
+                                            <!-- <span class="pull-left"> Area : 120m </span> -->
+                                            <span class="proerty-price pull-left"> RS <?php echo $results['Rent'];?>/ Month</span>
+                                            
+                                            <div class="property-icon">
+                                                <img src="../assets/img/icon/bed.png"><?php echo $results['Roomtype']; ?>&nbsp;&nbsp;|
+                                                <img src="../assets/img/icon/shawer.png"><?php echo $results['Bathroom']; ?>
+                                                <!-- <img src="assets/img/icon/cars.png">(1) -->  
+                                            </div>
+
+</div>
+
+                    
+
+                                       
+                                    </div>
+                                </div>
+
+<?php  } ?>
+
+
+
+                   <!-- <div class="col-sm-4 col-lg-4 col-md-4">
+                        <div class="thumbnail">
+                              
+ <a href="single_page.php?postid=<?php echo $results['Postroom_id'];?>&type=<?php echo $type;?>"> 
+                              <div id="myCarousel" class="carousel slide" data-ride="carousel">
+  <?php $image= array(); $i=0;
+ 
+          $sql=mysqli_query($con,"SELECT * FROM roomimages WHERE postroom_id='".$results['Postroom_id']."'")or die(mysqli_error($con));
+          while($row1=mysqli_fetch_array($sql)){
+        $count=mysqli_num_rows($sql);
+           $image[$i++]=$row1['uploadimage'];
+           }
+        ?>
+   
+
+    
+    <div class="carousel-inner" role="listbox">
+            
+            <div class="item active"> <img  style="width:500px; height:300px" src="../roomimages/<?php echo $image[0];?>" /><?php echo $results['Postroom_id'];?> </div>
+            <?php $imgCount =  sizeof($image);
+              for($i = 1; $i < $imgCount; $i++) {
+            ?>
+            <div class="item"> <img class="" style="width:500px; height:300px" src="../roomimages/<?php echo $image[0];?>" /> <?php echo $results['Postroom_id'];?></div>
+
+            <?php } ?>
+          </div>
+
+   
+  </div>
+</a>
+
+                            <div class="caption"  id="getresult" style="width:400px;height:250px;">
+                                <button  class="box-btn" id="wishbtn<?php echo $results['Postroom_id'];?>"   onclick="bookmark('<?php echo $results['Postroom_id'];?>','<?php echo $results['Type'];?>')"><span class="glyphicon glyphicon-heart-empty" ></span>
+</button>
+
+                                
+                                 <p><h4 style="text-align:left;" >$ <?php echo $results['Rent']; ?></h4></p>
+                                 <?php if($type=='postroom'){?>
+                                   <p>Roomfor : <?php echo $results['Interest_gender']; ?>
+                                     <?php }else {?>
+
+                                     <?php echo $results['Roommate_roomfor'];?></p>
+                                     <?php echo $results['Idealroommate'];?>
+                                     <?php echo $results['Collegename'];?>
+                                     <?php }?>
+
+                                   
+                                  <p><h4 style="text-align:left;" > PostAdd:<?php echo date('Y:m:d', strtotime($results['Postdate']))?></h4></p>
+                                 
+                                   <br>
+                                <p>Address : <?php echo $results['Address']; ?>  City : <?php echo $results['City']; ?> </p>
+                                
+                                <p>roomtype : <?php echo $results['Roomtype']; ?> </p> 
+                                 
+                    
+                                      
+                                     
+               
+                                </p>
+                                
+                                
+
+                                
+                            </div>
+                            
+                        </div>
+                        
+
+                    </div> -->
+                     
