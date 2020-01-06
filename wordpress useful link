@@ -1,0 +1,59 @@
+<?php echo home_url(); ?>
+ <?php the_field('emailid', 'option'); ?>
+ <?php $header_logo = get_field('logo', 'option'); ?>
+                        <a class="" href="<?php echo home_url(); ?>"><img src="<?php echo $header_logo['url'];?>" alt="" />
+                        
+                        
+<?php
+        $args = array(
+            'post_type' => 'course_catlog',
+            'orderby' => 'menu_order title',
+            'order'   => 'ASC',
+            'posts_per_page' => -1
+
+        );
+        $query = new WP_Query( $args );
+        ?>
+        <?php if($query->have_posts()) : ?>
+            <?php $i = 0; ?>
+            <?php while($query->have_posts()) : $query->the_post() ?>
+
+
+                    <li data-target="#myCarousel" data-slide-to="<?php echo $i ?>" class="<?php if($i === 0): ?>active<?php endif; ?>"></li>
+               
+                <?php $i++; ?>
+            <?php endwhile ?>
+        <?php endif ?>
+        <?php wp_reset_postdata(); ?>
+        
+        ---- repeater loop ----
+        
+        <?php if( have_rows('section_course') ){
+    
+      $count_link_repeater= 1;  while ( have_rows('section_course') ) { 
+      the_row();  
+      $course_name =  get_sub_field('course_name');
+      $course_page_link_url =  get_sub_field('course_page_link_url');
+      ?>
+
+                                            <div class="gdlr-core-pbf-element">
+                                                <div class="gdlr-core-title-item gdlr-core-item-pdb clearfix  gdlr-core-left-align gdlr-core-title-item-caption-top gdlr-core-item-pdlr"  id="gdlr-core-title-item-id-66469">
+                                                    <div class="gdlr-core-title-item-title-wrap clearfix">
+                                                        <h3 class="gdlr-core-title-item-title gdlr-core-skin-title " id="h3_1dd7_16"><a href="<?php echo $course_page_link_url;?>" style="color: #a5bae2" target="_self" ><?php echo $course_name;?></a></h3></div>
+                                                </div>
+                                            </div>
+
+                                            <?php 
+ 
+$count_link_repeater++;
+ }
+} // End reapter section
+?> 
+
+----- end repeater --- 
+
+<?php
+          wp_nav_menu( array( 'menu' => 'footer_menu1','menu_class' => 'gdlr-core-custom-menu-widget gdlr-core-menu-style-plain'));
+?>
+--- --
+<?php $footer_logo = get_field('footer_logo', 'option'); ?>
