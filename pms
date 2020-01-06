@@ -1,0 +1,2412 @@
+function.php
+
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL ^ E_NOTICE);
+define('DIRPATH_URL', 'http://localhost/projects/pms_php/');
+include 'misc_functions.php';
+session_start();
+
+class Admin_dashboard {
+
+	protected $servername = "localhost";
+    protected $username   = "root";
+    protected $password   = "";
+    protected $dbname     = "db_pms";
+
+    public  function DataBase_Connect(){
+    	$servername = $this->servername;
+    	$username   = $this->username;
+    	$password   = $this->password;
+    	$dbname     = $this->dbname;         	    	
+	    $conn = new mysqli($servername, $username, $password, $dbname); // Create connection	   	    
+	    if ($conn->connect_error) { // Check connection
+	    	
+	        die("Connection failed: " . $conn->connect_error);
+	    }
+	    return $conn;
+
+    }	
+    
+	public function load( $tpl, $arr = array(),$return = false) {
+          $path = DIRPATH_URL.'include/html/projects/'.$tpl.'.php';
+     if( file_exists($path) ) {
+          foreach( $arr as $key => $value ) {
+               $$key = $value;
+          }
+          unset( $arr );
+
+          ob_start();
+          require_once( $path );
+          $template = ob_get_contents();
+          ob_end_clean();
+
+          if( $return == false ) {
+               echo $template;
+          } else {
+               return $template;
+          }
+     } else {
+          return false;
+     }
+   }
+
+    public function pagename(){
+    	
+		$page = basename($_SERVER['PHP_SELF']); // Get script filename without any path information
+		$page = str_replace( array( '.php', '.htm', '.html' ), '', $page ); // Remove extensions
+		$page = str_replace( array('-', '_'), ' ', $page); // Change underscores/hyphens to spaces
+		$page = ucwords( $page );
+
+    }
+
+	public function title(){
+
+		$slug  = $_SERVER['PHP_SELF'];
+		$name  = str_replace(".php", NULL, $slug);
+		$name  = str_replace("/", NULL, $name);
+		$name  = str_replace("-", " ", $name);
+		$ucase = ucwords($name);
+
+		$title_helpers = array('Techvalens' , '|' , 'Project Management System');
+
+		if ($name == 'index' || $name == 'functions') {
+
+			$title = '<title>' . $title_helpers[0] . $title_helpers[1] .$title_helpers[2] . '</title>' . "\r\n";
+
+		}else{
+
+			$title = '<title>' . str_replace('index', NULL, $ucase) . $title_helpers[1] . $title_helpers[0] . '</title>' . "\r\n";
+
+		}
+
+		echo $title;
+		
+	}
+
+	public function navbar(){
+
+		include 'navbar.php';          
+	}
+
+	public function sidenav(){
+                
+        include 'sidenav.php';
+	}
+	public function getBaseUrl(){
+	
+		$currentPath = $_SERVER['PHP_SELF']; // output: /myproject/index.php			 
+		$pathInfo = pathinfo($currentPath);// output: Array ( [dirname] => /myproject [basename] => index.php [extension] => php [filename] => index )	
+		$hostName = $_SERVER['HTTP_HOST']; // output: localhost			
+		$protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https://'?'https://':'http://'; // output: http://
+		$requested = $_SERVER['REQUEST_URI'];	
+		return $protocol.$hostName.$pathInfo['dirname']."/"; // return: http://localhost/myproject/
+	}
+
+	public function redirect($url, $permanent = false) {
+		if($permanent) {
+			header('HTTP/1.1 301 Moved Permanently');
+		}
+		header('Location: '.$url);
+		exit();
+    }
+
+    public function header_script(){
+		echo '<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<!-- Main Styles -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/styles/main.css">
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/styles/style.min.css">
+         <!--pdf , excel button in datatable
+		 <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+		 <link href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css" rel="stylesheet">-->
+
+       <!-- toastr Styles -->
+       
+
+        <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+		<!-- Material Design Icon -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/fonts/material-design/css/materialdesignicons.css">        
+        <!-- Datepicker -->
+	   <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/datepicker/css/bootstrap-datepicker.min.css">        
+        <!-- FlexDatalist -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/flexdatalist/jquery.flexdatalist.min.css">
+		<!-- Popover -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/popover/jquery.popSelect.min.css">
+		<!-- Select2 -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/select2/css/select2.min.css">        
+        <!-- DateRangepicker -->
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/daterangepicker/daterangepicker.css">        
+	    <!-- Touch Spin -->
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/touchspin/jquery.bootstrap-touchspin.min.css">
+        <!-- Timepicker -->
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/timepicker/bootstrap-timepicker.min.css">
+		<!-- mCustomScrollbar -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/mCustomScrollbar/jquery.mCustomScrollbar.min.css">
+		<!-- Waves Effect -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/waves/waves.min.css">       
+        <!-- Dropify -->
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/dropify/css/dropify.min.css">
+		<!-- Sweet Alert -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/sweet-alert/sweetalert.css">
+		<!-- Percent Circle -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/percircle/css/percircle.css">
+		<!-- Chartist Chart -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/chart/chartist/chartist.min.css">
+		<!-- FullCalendar -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/fullcalendar/fullcalendar.min.css">
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/fullcalendar/fullcalendar.print.css" media="print">
+		<!-- Color Picker -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/color-switcher/color-switcher.min.css">
+		<!-- form wizard -->
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/form-wizard/prettify.css">        
+        <!-- Data Tables -->
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/datatables/media/css/dataTables.bootstrap.min.css">
+	    <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/datatables/extensions/Responsive/css/responsive.bootstrap.min.css">		
+		<!-- Remodal 
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/modal/remodal/remodal.css">
+		<link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/modal/remodal/remodal-default-theme.css"> -->		
+	    <!-- <link rel="stylesheet" href="'.DIRPATH_URL.'light/assets/plugin/tinymce/skins/lightgray/skin.min.css"> -->	    
+	    <style>
+       .modal-backdrop.in{
+        	    opacity: .5 !important;
+                z-index: -1 !important;
+        }
+
+		.modal-content {
+
+		    margin-top: 10% !important;
+		    
+		}
+		@media (min-width: 768px)
+		.modal-content {
+		    -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+		    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+		}
+	    </style>
+		</head>
+		<body>';
+	}
+
+	public function footer_script(){
+		echo '<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+		<!-- <script src="https://cdn.datatables.net/buttons/1.5.6/js/dataTables.buttons.min.js"></script>
+		 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+		 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+		 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+		 <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>-->
+
+		<script src="'.DIRPATH_URL.'light/assets/scripts/jquery.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/modernizr.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/bootstrap/js/bootstrap.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/nprogress/nprogress.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/sweet-alert/sweetalert.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/waves/waves.min.js"></script>       
+        <!-- toastr script -->
+		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+		<!-- Full Screen Plugin -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/fullscreen/jquery.fullscreen-min.js"></script>
+		<!-- Google Chart -->
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>        
+		<!-- Select2 -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/select2/js/select2.min.js"></script>
+		<!-- Multi Select -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/multiselect/multiselect.min.js"></script>
+		<!-- Touch Spin -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/touchspin/jquery.bootstrap-touchspin.min.js"></script>
+		<!-- Timepicker -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/timepicker/bootstrap-timepicker.min.js"></script>
+		<!-- Colorpicker -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/colorpicker/js/bootstrap-colorpicker.min.js"></script>
+		<!-- Datepicker -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/datepicker/js/bootstrap-datepicker.min.js"></script>
+		<!-- Moment -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/moment/moment.js"></script>
+		<!-- DateRangepicker -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/daterangepicker/daterangepicker.js"></script>
+		<!-- Maxlength -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/maxlength/bootstrap-maxlength.min.js"></script>
+		<!-- chart.js Chart -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/chart/chartjs/Chart.bundle.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/chart.chartjs.init.min.js"></script>
+		<!-- FullCalendar -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/moment/moment.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/fullcalendar/fullcalendar.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/fullcalendar.init.js"></script>
+		<!-- Sparkline Chart -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/chart/sparkline/jquery.sparkline.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/chart.sparkline.init.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/main.js"></script>
+		<!--<script src="'.DIRPATH_URL.'light/assets/scripts/main.min.js"></script>
+		<script type="'.DIRPATH_URL.'light/assets/scripts/x-editable.demo.js"></script>
+		<script type="'.DIRPATH_URL.'light/assets/scripts/treeview.init.js"></script>
+		<script type="'.DIRPATH_URL.'light/assets/scripts/tourist.demo.js"></script>
+		<script type="'.DIRPATH_URL.'light/assets/scripts/toastr.demo.js"></script>
+		<script type="'.DIRPATH_URL.'light/assets/scripts/sweetalert.init.js"></script> -->
+		<script src="'.DIRPATH_URL.'light/assets/color-switcher/color-switcher.min.js"></script>
+		<!-- Form Wizard -->
+		<script src="'.DIRPATH_URL.'light/assets/plugin/form-wizard/prettify.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/form-wizard/jquery.bootstrap.wizard.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/plugin/jquery-validation/jquery.validate.min.js"></script>
+		<script src="'.DIRPATH_URL.'light/assets/scripts/form.wizard.init.min.js"></script>
+		<script src="https://cdn.ckeditor.com/4.5.11/full/ckeditor.js"></script>
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.2/ckeditor.js"></script>
+        <!--bootstrap-maxlength -->
+        <script src="'.DIRPATH_URL.'light/assets/plugin/maxlength/bootstrap-maxlength.min.js"></script>       
+        <!-- Demo Scripts -->
+	    <script src="'.DIRPATH_URL.'light/assets/scripts/form.demo.min.js"></script>
+	    <!-- Dropify -->
+	    <script src="'.DIRPATH_URL.'light/assets/plugin/dropify/js/dropify.min.js"></script>
+	    <script src="'.DIRPATH_URL.'light/assets/scripts/fileUpload.demo.min.js"></script>
+	
+    <script src="'.DIRPATH_URL.'light/assets/scripts/ckeditor.js"></script>
+    <!-- Data Tables -->
+	<script src="'.DIRPATH_URL.'light/assets/plugin/datatables/media/js/jquery.dataTables.min.js"></script>
+	<script src="'.DIRPATH_URL.'light/assets/plugin/datatables/media/js/dataTables.bootstrap.min.js"></script>
+	<script src="'.DIRPATH_URL.'light/assets/plugin/datatables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
+	<script src="'.DIRPATH_URL.'light/assets/plugin/datatables/extensions/Responsive/js/responsive.bootstrap.min.js"></script>
+	<script src="'.DIRPATH_URL.'light/assets/scripts/datatables.demo.min.js"></script>	
+	<!-- Remodal <script src="'.DIRPATH_URL.'light/assets/plugin/modal/remodal/remodal.min.js"></script>--> 
+	';?>
+	</body>
+</html>
+
+       <script type="text/javascript">
+       	function Modalajax(popup,table_id,ModalBtn_id,form_id,redirect_url,tbody_id,checkavailabity,sucessmessage,errormessage,updatemessage,deletemessage){
+       		$(document).ready(function(){
+			$('#'+ModalBtn_id).on('click', function() {
+            $('.messages').html('');
+			    $('#'+form_id).on('submit',(function(e) {
+                    e.preventDefault();
+                        if (new FormData(this) == '') {}else{ 
+                          var manageMemberTable = $('#'+form_id).val();                             
+                            $.ajax({
+	                            url: redirect_url,  
+	                            type: 'POST',
+	                            data:  new FormData(this),
+	                            dataType: 'json',	                     
+	                            contentType: false,
+	                            cache: false,
+	                            processData:false,
+	                            success: function(response)
+		                        {    
+		                                                                                
+									// if(response == 'success') {
+									// $('.alert-success').show();
+									// $('.alert-success').text(sucessmessage).fadeOut(4000);
+									// $("#"+form_id)[0].reset();				                            
+									// manageMemberTable.ajax.reload(null, false);
+									// location.reload(true);
+									// }
+									// else if(response == 'already') {
+									// $('.alert-success').show();
+									// $('.alert-success').text(sucessmessage).fadeOut(4000);
+									// $("#"+form_id)[0].reset();				                            
+									// manageMemberTable.ajax.reload(null, false);
+									// location.reload(true);
+									// }
+									// else{
+									// $('.alert-danger').show();
+									// $('.alert-danger').text(sucessmessage).fadeOut(4000);
+									// $("#"+form_id)[0].reset();				                            
+									// manageMemberTable.ajax.reload(null, false);
+									// location.reload(true);
+									// }
+
+									if(response.success == true) {						
+									$(".removeMessages").html('<div class="alert alert-success alert-dismissible" role="alert">'+
+									'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+									'<strong> <span class="glyphicon glyphicon-ok-sign"></span> </strong>'+response.messages+
+									'</div>').fadeOut(4000);
+                                    $("#"+form_id)[0].reset();									
+									manageMemberTable.ajax.reload(null, false);
+									location.reload(true);
+									} else {
+									$(".removeMessages").html('<div class="alert alert-warning alert-dismissible" role="alert">'+
+									'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+									'<strong> <span class="glyphicon glyphicon-exclamation-sign"></span> </strong>'+response.messages+
+									'</div>').fadeOut(4000);
+									$("#"+form_id)[0].reset();									
+									manageMemberTable.ajax.reload(null, false);
+									location.reload(true);
+									}
+	                            } 
+                            });
+                            return false;
+                        }
+            }));
+            });
+            });
+		}
+
+	function Delete_DataTable(popopen_remove,removebutton_id,form_id,table_id,token,redirect_url,tablecolumnId,id,data_id,table_name){
+		if(id) {
+			$(document).ready(function(){
+			$('#'+removebutton_id).unbind('click').bind('click', function() {
+            
+            var table = $('#'+table_id).DataTable({
+		        'destroy': true
+				
+            });   
+           
+			$.ajax({
+			url: redirect_url,
+			type: 'POST',
+			dataType: 'json',
+			data:{deltoken_modal: token ,tablecolumnId:tablecolumnId,dataid:data_id,table_name:table_name},		
+			success: function(response)
+			{
+			if(response.success == true) {						
+						$(".removeMessages").html('<div class="alert alert-success alert-dismissible" role="alert">'+
+							  '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+							  '<strong> <span class="glyphicon glyphicon-ok-sign"></span> </strong>'+response.messages+
+							'</div>').fadeOut(4000);
+
+						      location.reload(true);
+                              $("#"+popopen_remove).modal('hide');
+                              $("#"+form_id)[0].reset();
+					
+
+					} else {
+						$(".removeMessages").html('<div class="alert alert-warning alert-dismissible" role="alert">'+
+							  '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+							  '<strong> <span class="glyphicon glyphicon-exclamation-sign"></span> </strong>'+response.messages+
+							'</div>').fadeOut(4000);
+						
+					}    
+			} 
+			});
+		    
+            });
+            });
+		}
+		else {
+		alert('Error: Refresh the page again');
+	    }
+	}
+
+       </script>        
+	
+<?php }
+
+}
+
+
+
+class FormHandle
+{   
+
+    public function Modal_FormRemove($removeModalID,$title_heading, $modalremove_id){
+    	echo '<div class="modal fade" tabindex="-1" role="dialog" id="'.$removeModalID.'">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title"><span class="glyphicon glyphicon-trash"></span> '.$title_heading.'</h4>
+	      </div>
+	      <div class="modal-body">
+	        <p>Do you really want to remove ?</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary" id="'.$modalremove_id.'">Save changes</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>';
+    }
+     
+
+    public function Modal_FormEdit($edit_id,$token_md_value,$redirect_url,$tablecolumnId,$id,$data_id,$table_name,$data_target,$ModalBtn_id,$button_name,$modalfade_id,$modaltitle_name,$formid,$form_html,$token_name){
+    	echo '
+				<button  onclick="editFormPopUp('.$edit_id.','.$token_md_value.','.$redirect_url.','.$tablecolumnId.','.$id.','.$data_id.','.$table_name.')" class="btn btn-primary" role="button" type="button"  data-target="#'.$data_target.'" id="'.$ModalBtn_id.'">
+				'.$button_name.' 
+				</button>
+			</div>';
+
+    	echo '<div class="modal fade" tabindex="-1" role="dialog" id="'.$modalfade_id.'">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title"><span class="glyphicon glyphicon-edit"></span> '.$modaltitle_name.'</h4>
+	      </div>
+
+		    <form class="form-horizontal" action="" method="POST" id="'.$formid.'">
+			<input type="hidden" name="'.$token_name.'"  id="'.$token_name.'" value="'.$token_md_value.'">';?>
+
+           <?php echo $form_html;?>
+	      
+	      </form>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+    <?php 
+    }
+    
+     public function Modal_FormOpen($classname,$pop_size,$edit_id,$data_target,$ModalBtn_id,$button_name,$modalfade_id,$modaltitle_name,$formid,$form_html,$token_name,$token_md_value){
+    
+
+        echo '<div class="col-xs-12">
+			<div class="removeMessages"></div>
+				<button style="margin-bottom: 5%;" class="btn btn-default  '.$classname.' " data-toggle="modal" data-target="#'.$data_target.'" id="'.$ModalBtn_id.'">
+				<span class="glyphicon glyphicon-plus-sign"></span>	'.$button_name.' 
+				</button>
+			</div>';
+
+	    echo '<div class="modal fade" tabindex="-1" role="dialog" id="'.$modalfade_id.'">
+			<div class="modal-dialog '.$pop_size.' " role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4 class="modal-title"><span class="glyphicon glyphicon-plus-sign"></span>	'.$modaltitle_name.'</h4>
+			</div>
+			<form class="form-horizontal" action="" method="POST" id="'.$formid.'">
+			<input type="hidden" name="'.$token_name.'"  id="'.$token_name.'" value="'.$token_md_value.'">
+			<input type="hidden" name="edit_id"  id="edit_id_'.$edit_id.'" value="'.$edit_id.'">';?>
+
+           <?php echo $form_html;?>
+		   </form>            
+			</div>
+			</div>
+			</div>
+            <?php
+    }
+
+    public function ModalFormajax($popup,$table_id,$ModalBtn_id,$form_id,$redirect_url,$tbody_id,$checkavailabity,$sucessmessage,$errormessage,$updatemessage,$deletemessage){
+       echo "<script type='text/javascript'>           
+		    $(document).ready(function(){
+		    	$('#".$table_id."').DataTable({				
+		    });	
+			$('#".$ModalBtn_id."').on('click', function() {
+            $('.messages').html('');
+			    $('#".$form_id."').on('submit',(function(e) {
+                    e.preventDefault();
+                        if (new FormData(this) == '') {}else{ 
+                         var manageMemberTable = $('#".$table_id."').val();                             
+                            $.ajax({
+	                            url: '".$redirect_url."',  
+	                            type: 'POST',
+	                            data:  new FormData(this),	                     
+	                            contentType: false,
+
+	                            cache: false,
+	                            processData:false,
+	                                success: function(response)
+		                            {    
+		                                                                                
+			                            if(response == 'sucess') {
+			                            // $('#".$popup."').trigger('click');
+			                            // $('#".$popup."').tab('show');
+			                            // $('#".$form_id."')[0].reset();		
+							            //manageMemberTable.ajax.reload(null, false);
+
+										  $('.alert-success').show();
+			                              $('.alert-success').text('".$sucessmessage."').fadeOut(4000);
+
+
+									    } 
+									    else if(response == 'already'){
+										 $('.alert-danger').show();
+										 $('.alert-danger').text('".$checkavailabity."').fadeOut(4000);
+
+										 }
+										 else if(response == 'update'){
+										 $('.alert-success').show();
+										 $('.alert-success').text('".$updatemessage."').fadeOut(4000);
+
+										 }
+
+                                        else if(response == 'delete'){
+										 $('.alert-danger').show();
+										 $('.alert-danger').text('".$deletemessage."').fadeOut(4000);
+
+										}
+
+										else {
+										$('.alert-danger').show();
+										$('.alert-danger').text('".$errormessage."').fadeOut(4000);
+										}
+	   
+	                                } 
+                            });
+                            return false;
+                        }
+            }));
+            });
+            });
+            </script>";
+	}
+
+    public  function MenuPage($id,$slug){
+		$fileName = '../menu/'.$slug.'.php';
+		$template = file_get_contents('http://'.$_SERVER['HTTP_HOST'].'/menu/defaults/template.txt');
+		$final = str_replace("REPLCEID", $id, $template);
+		$new = fopen($fileName, "w") or die("Unable to open file!");
+		if (fwrite($new, $final)) {
+			echo "success";
+		}else{
+			echo "Error";
+		}
+		fclose($new);
+	}
+    
+	public function build_table($array,$table_id,$tbody_id){
+        echo '<table style="margin-top: 5%;" id="'.$table_id.'" class="table table-striped table-bordered display" style="width:100%"><thead><tr>';
+			foreach ($array as $key ) {
+				$html .= '<th>'.htmlspecialchars($key).'</th>';
+			}
+		echo $html; echo '</tr></thead><tbody id="'.$tbody_id.'"> </tbody></table>';
+
+    }
+    public function Formajax_check($formid,$redirect_url,$checkavailabity,$sucessmessage,$errormessage,$updatemessage){
+
+		echo "<script type='text/javascript'>           
+		    $(document).ready(function(){
+			    $('#".$formid."').on('submit',(function(e) {
+                          e.preventDefault();
+                              if (new FormData(this) == '') {}else{ 
+
+                             $.ajax({
+                                  url: '".$redirect_url."',
+                                  type: 'POST',
+                                  data:  new FormData(this),
+                                  dataType:'json',
+                                  contentType: false,
+                                  cache: false,
+                                  processData:false,
+
+                              success: function(data)
+	                              {  
+	                              var data = $.parseJSON(data);        
+							      var table = $('#example').DataTable();
+							      table.ajax.reload(null, false);                                     
+                                  } 
+                         });
+                         }
+                }));
+            });
+            </script>";
+
+	}
+
+    public function Formajax($formid,$redirect_url,$checkavailabity,$sucessmessage,$errormessage,$updatemessage){
+
+		echo "<script type='text/javascript'>           
+		    $(document).ready(function(){
+			    $('#".$formid."').on('submit',(function(e) {
+                          e.preventDefault();
+                              if (new FormData(this) == '') {}else{ 
+
+                             $.ajax({
+                                  url: '".$redirect_url."',
+                                  type: 'POST',
+                                  data:  new FormData(this),                                  
+                                  contentType: false,
+                                  cache: false,
+                                  processData:false,
+
+                              success: function(data)
+	                              {  
+
+                                  if (data == 'success') {
+
+                                    $('.alert-success').show();
+                                    $('.alert-success').text('".$sucessmessage."').fadeOut(4000); 
+
+                                    //'".$formid."'.ajax.reload(null, false);
+                                 
+									setTimeout(function(){									
+									$('#".$formid."').trigger('reset')
+									}, 5000);           
+                                  }
+                                  else if(data == 'already'){
+                                  	$('.alert-danger').show();
+                                  	$('.alert-danger').text('".$checkavailabity."').fadeOut(4000);
+
+                                  }
+                                  else if(data == 'update'){
+                                  	$('.alert-success').show();
+                                  	$('.alert-success').text('".$updatemessage."').fadeOut(4000);
+
+                                  }
+
+                                  else{
+                                  	$('.alert-danger').show();
+                                  	$('.alert-danger').text('".$errormessage."').fadeOut(4000);                                  	                                     
+                                  }     
+                              } 
+                         });
+                         }
+                }));
+            });
+            </script>";
+
+	}
+	public function verifyToken_modal($fields_name,$token,$form_data,$table_name){
+
+        if($fields_name = md5($token)) {
+                    
+                  $checkavailabity = $this->DBSELECTWHERE($table_name,'*', '' , $form_data);   
+
+                  if ($checkavailabity->num_rows == 1) {	
+
+                    	echo 'already';
+
+                    }
+                    else
+                    {                    	
+                    	$date_time = date('l jS \of F Y h:i:s');
+                    	$form_data += ['time_stamp' => $date_time];
+                    	
+		                $result = $this->DBInsert_Modal($table_name,$form_data);
+						if ($result === TRUE) {
+						echo "success";
+						}else{
+						echo "error";
+					    }
+                        
+					    
+				    }
+		}
+    }
+	// public function verifyToken_modal($fields_name,$token,$form_data,$table_name){
+
+ //        if($fields_name = md5($token)) {
+ //                    $validator = array('success' => false, 'messages' => array());    
+ //                    $checkavailabity = $this->DBSELECTWHERE($table_name,'*', '' , $form_data);   
+
+ //                    if ($checkavailabity->num_rows == 1) {	
+
+ //                    	if($checkavailabity === TRUE) {			
+	// 					$validator['success'] = true;
+	// 					$validator['messages'] = "Update Successfully Record!!";		
+	// 					} else {		
+	// 					$validator['success'] = false;
+	// 					$validator['messages'] = "Error while Update  information";
+	// 					}
+ //                        echo json_encode($validator);
+ //                        return;
+ //                    }
+ //                    else
+ //                    {                    	
+ //                    	$date_time = date('l jS \of F Y h:i:s');
+ //                    	$form_data += ['time_stamp' => $date_time];
+                    	
+	// 	                $result = $this->DBInsert_Modal($table_name,$form_data);
+	// 					if($result === TRUE) {			
+	// 					$validator['success'] = true;
+	// 					$validator['messages'] = "Successfully Added";		
+	// 					} else {		
+	// 					$validator['success'] = false;
+	// 					$validator['messages'] = "Error while adding the member information";
+	// 					}
+	// 					echo json_encode($validator);
+	// 					return;
+                        
+					    
+	// 			    }
+	// 	}
+ //    }
+
+		    
+    public function verifyToken($fields_name,$token,$form_data,$table_name){
+
+        if($fields_name = md5($token)) {
+                        
+                    $checkavailabity = $this->DBSELECTWHERE($table_name,'*', '' , $form_data);   
+
+                    if ($checkavailabity->num_rows == 1) {	
+
+                    	echo 'already';
+
+                    }
+                    else
+                    {                    	
+                    	$date_time = date('l jS \of F Y h:i:s');
+                    	$form_data += ['time_stamp' => $date_time];
+                    	
+		                $result = $this->DBInsert($table_name,$form_data);
+					    if ($result === TRUE) {
+						echo "success";
+						}else{
+						echo "error";
+					    }
+					    
+				    }
+		}
+    }
+
+    public function DBSELECTWHERE($table_name, $select='*' , $where_clause='' , $form_data){ 
+		$dyn = new Admin_dashboard();
+	    $conn = $dyn->DataBase_Connect();
+	  
+	    $whereSQL = '';
+	    if(!empty($where_clause))
+	    {
+	        
+	        if(substr(strtoupper(trim($where_clause)), 0, 5) != 'WHERE')
+	        {
+	           
+	            $whereSQL = " WHERE ".$where_clause;
+	        } else
+	        {
+	            $whereSQL = " ".trim($where_clause);
+	        }
+	    }
+	   	 	    
+	   $sets = array();
+	    foreach($form_data as $column => $value)
+	    {
+	         $sets[] = "`".$column."` = '".$value."' ";
+	    }
+        $sql = "SELECT ".$select." FROM `".$table_name."` WHERE ";
+	    $sql .= implode('AND', $sets);
+	   
+	    $sql .= $whereSQL;
+	  
+	    return $conn->query($sql);
+	}
+	
+
+	public function DBSELECT($table_name, $select='*', $where_clause=''){ 
+		$dyn = new Admin_dashboard();
+	    $conn = $dyn->DataBase_Connect();
+	   
+	    $whereSQL = '';
+	    if(!empty($where_clause))
+	    {
+	       
+	        if(substr(strtoupper(trim($where_clause)), 0, 5) != 'WHERE')
+	        {
+	        
+	            $whereSQL = " WHERE ".$where_clause;
+	        } else
+	        {
+	            $whereSQL = " ".trim($where_clause);
+	        }
+	    }
+	    
+	   $sql = "SELECT ".$select." FROM `".$table_name."` ";
+	   
+	   $sql .= $whereSQL;
+	    
+	    return $conn->query($sql);
+	}	
+	
+	public function DBUpdate($table_name, $form_data, $where_clause=''){   
+		 $dyn = new Admin_dashboard();
+	     $conn = $dyn->DataBase_Connect();
+
+	    $whereSQL = '';                                                
+	    if(!empty($where_clause))
+	    {
+	     
+	        if(substr(strtoupper(trim($where_clause)), 0, 5) != 'WHERE')
+	        {
+	           
+	            $whereSQL = " WHERE ".$where_clause;
+	        } else
+	        {
+	            $whereSQL = " ".trim($where_clause);
+	        }
+	    }
+	    
+	     $sql = "UPDATE ".$table_name." SET ";    
+
+	    $sets = array();
+	    foreach($form_data as $column => $value)
+	    {
+	         $sets[] = "`".$column."` = '".$value."'";
+	    }
+	    $sql .= implode(', ', $sets);
+	 
+	      $sql .= $whereSQL;
+	    
+	    return $conn->query($sql);
+	}
+	
+	public function DBDelete($table_name, $where_clause=''){
+	     $dyn = new Admin_dashboard();
+	     $conn = $dyn->DataBase_Connect();
+
+	    $whereSQL = '';              
+	    if(!empty($where_clause))
+	    {
+	        
+	        if(substr(strtoupper(trim($where_clause)), 0, 5) != 'WHERE') 
+	        {
+	            
+	            $whereSQL = " WHERE ".$where_clause;  
+	        } else
+	        {
+	            $whereSQL = " ".trim($where_clause);
+	        }
+	    }	    
+	    $sql = "DELETE FROM ".$table_name.$whereSQL;     
+	    return $conn->query($sql); 
+	}
+
+	public function DBInsert($table_name, $form_data){
+		
+	    $dyn = new Admin_dashboard();
+	    $conn = $dyn->DataBase_Connect();
+	    $fields = array_keys($form_data);        
+	    $sql = "INSERT INTO ".$table_name."
+	    (`".implode('`,`',$fields)."`)
+	    VALUES('".implode("','", $form_data)."')";
+	        
+	    return $conn->query($sql);
+	}	
+
+	public function DBInsert_Modal($table_name, $form_data){
+	
+	    $dyn = new Admin_dashboard();
+	    $conn = $dyn->DataBase_Connect();
+	    $fields = array_keys($form_data);        
+	    $sql = "INSERT INTO ".$table_name."
+	    (`".implode('`,`',$fields)."`)
+	    VALUES('".implode("','", $form_data)."')";
+	    
+	    	  
+	    return $conn->query($sql);
+
+	}
+	
+}
+
+$handle = new FormHandle();	
+    
+/*-------------------Form Requests Management--------------------------------*/
+    
+
+    
+	if (isset($_POST['PMS_GeneralSetting'])) {
+		
+		if($_POST['PMS_GeneralSetting'] === md5('PMS_GeneralSettingToken')) {
+			        
+			        if(is_uploaded_file($_FILES['company_logo']['tmp_name'])) {
+					$ImageSavefolder =  'upload/general_setting/';
+					$company_logo = $_FILES["company_logo"]["name"];
+					$temp = $_FILES["company_logo"]["tmp_name"] ;
+					$wer = move_uploaded_file($temp,"$ImageSavefolder".$company_logo );
+					}
+
+					if(is_uploaded_file($_FILES['company_favicon']['tmp_name'])) {
+					$ImageSavefolder =  'upload/general_setting/';
+					$company_favicon = $_FILES["company_favicon"]["name"];
+					$temp = $_FILES["company_favicon"]["tmp_name"] ;
+					$wer = move_uploaded_file($temp,"$ImageSavefolder".$company_favicon );
+					}
+					
+					if(is_uploaded_file($_FILES['login_bk_image']['tmp_name'])) {
+					$ImageSavefolder =  'upload/general_setting/';
+					$login_bk_image = $_FILES["login_bk_image"]["name"];
+					$temp = $_FILES["login_bk_image"]["tmp_name"] ;
+					$wer = move_uploaded_file($temp,"$ImageSavefolder".$login_bk_image );
+					}
+                    
+					$data = array('company_logo' => $company_logo, 'company_favicon' => $company_favicon, 'login_show_image' => $_POST['login_show_image'], 'login_show_bk_image' => $login_show_bk_image, 'login_bk_image' => $login_bk_image , 'login_title' => $_POST['login_title']);
+                   
+					$result = $handle->DBSELECT('setting_general_setting');
+
+					if ($result->num_rows > 0) {
+
+                      if(!empty($company_logo)){
+
+                      	$company_logo = $_FILES["company_logo"]["name"];
+                      }
+                      else {
+
+                      	$company_logo  = $_POST['preview_nameimg1'];
+
+                      }
+                      
+                      if(!empty($company_favicon)){
+
+                      	$company_favicon = $_FILES["company_favicon"]["name"];
+                      }
+                      else {
+
+                      	$company_favicon  = $_POST['preview_nameimg2'];
+
+                      }
+
+                       if(!empty($login_bk_image)){
+
+                      	$login_bk_image = $_FILES["login_bk_image"]["name"];
+                      }
+                      else {
+
+                      	$login_bk_image  = $_POST['preview_nameimg3'];
+
+                      }
+
+
+                    $data = array('company_logo' => $company_logo, 'company_favicon' => $company_favicon, 'login_show_image' => $_POST['login_show_image'], 'login_show_bk_image' => $_POST['login_show_bk_image'], 'login_bk_image' => $login_bk_image , 'login_title' => $_POST['login_title']);
+
+
+					$run_query = $handle->DBUpdate('setting_general_setting',$data , 'WHERE `SettingId` = "'.$_POST['table_id'].'" ');
+
+					if ($run_query === TRUE) {
+					echo "update";
+					}else{
+					echo "error";
+					}
+
+					}
+					else{
+					$run_query = $handle->verifyToken('PMS_GeneralSetting','PMS_GeneralSettingToken',$data,'setting_general_setting');
+
+					}
+		}
+
+	}  
+
+    if (isset($_POST['PMS_CompanyDetail'])){
+			
+		$data = array('company_name' => $_POST['company_name'],'company_email' => $_POST['company_email'],'company_description' => $_POST['company_description'],'company_address' => $_POST['company_address'],'company_phone' => $_POST['company_phone'],'company_website' => $_POST['company_website'],'company_gstno' => strtoupper($_POST['company_gstno']));
+	    $result = $handle->DBSELECT('setting_companydetail');
+		if ($result->num_rows == 1) {
+        
+        $run_query = $handle->DBUpdate('setting_companydetail',$data);
+
+        if ($run_query === TRUE) {
+					echo "update";
+					}else{
+					echo "error";
+					}
+
+        }
+       else{
+       	$run_query = $handle->verifyToken('PMS_CompanyDetail','PMS_CompanyDetailToken',$data,'setting_companydetail');
+       	
+       }
+		
+	}
+
+    if (isset($_POST['PMS_EmailSettings'])) {
+				
+		$run_query = $handle->verifyToken('PMS_EmailSettings','PMS_EmailSettingsToken',$data = array('email_address' => $_POST['email_address'], 'email_name' => $_POST['email_name'], 'email_smtp' => $_POST['email_smtp'], 'email_test' => $_POST['email_test']),'setting_email_setting');
+	}
+
+	if (isset($_POST['PMS_EditorLogin'])) {
+				
+		$run_query = $handle->verifyToken('PMS_EditorLogin','PMS_EditorLoginToken',$data = array('ckeditor_login_info' => html_entity_decode($_POST['ckeditor_login_info']), 'ckeditor_team_member' => html_entity_decode($_POST['ckeditor_team_member']), 'ckeditor_client' => html_entity_decode($_POST['ckeditor_client']), 'ckeditor_invoice' => html_entity_decode($_POST['ckeditor_invoice']), 'ckeditor_paymentconfirm' => html_entity_decode($_POST['ckeditor_paymentconfirm'])),'setting_email_template');
+	}
+    
+	//    if (isset($_POST['PMS_PermissionList'])){
+	//     	if($_POST['PMS_PermissionList'] === md5('PMS_PermissionListToken')) {
+
+	// 	$oauth_user_permission = implode(",",$_POST['oauth_user_permission']);
+
+	// 	$data = array('oauth_user_permission' => $oauth_user_permission);                  
+	//        $run_query = $handle->DBUpdate('pms_users',$data , 'WHERE `id` = "'.$_SESSION['userData']['id'].'" ');
+
+	//        if ($run_query === TRUE) {
+	// 	 echo "update";
+	// 	}        
+
+	//    }
+
+	// }
+
+    if (isset($_POST['PMS_AccessType'])){
+          
+		$data = array('accesstype' => $_POST['accesstype'],'status' => $_POST['status']);        
+		$run_query = $handle->verifyToken('PMS_AccessType','PMS_AccessTypeToken',$data,'setting_accesstype');
+		
+		
+	}
+
+	// if (isset($_POST['PMS_Roles'])) {
+		
+	// 	$validator = array('data' => array());	
+	// 	$data = array('role' => strtolower($_POST['role']));      
+	// 	$run_query = $handle->DBInsert_Modal('setting_roles',$data);
+        
+	// 	if($run_query === TRUE) {	
+	// 	echo json_encode($data); 	
+	// 	$validator['data'][] = $data;
+
+	// 	$validator['success'] = true;
+	// 	$validator['messages'] = "Successfully Added";		
+	// 	} else {		
+	// 	$validator['success'] = false;
+	// 	$validator['messages'] = "Error while adding the member information";
+	// 	}
+	// 	}		
+		 
+
+	// 	$run_query = $handle->verifyToken('PMS_Roles','PMS_RolesToken',$data = array('role' => strtolower($_POST['role'])),'setting_roles');
+
+	// }
+
+	// if (isset($_POST['PMS_TeamMember'])) {
+				
+	// 	$run_query = $handle->verifyToken('PMS_TeamMember','PMS_TeamMemberToken',$data = array('Roles_Id' => $_POST['Roles_Id'],'member_profile' => $_POST['member_profile'],'team_member' => $_POST['team_member']),'setting_accesspermision');
+	// }	
+      
+      if(isset($_POST['PMS_UserList'])){
+
+      	$oauth_user_permission = implode(",",$_POST['oauth_user_permission']);
+      	$data = array('email' => $_POST['email'],'oauth_user_role' => $_POST['oauth_user_role'] ,'user_profile' => $_POST['user_profile'],'user_member' => $_POST['user_member'],'oauth_user_permission' => $oauth_user_permission);
+
+         $run_query = $handle->verifyToken('PMS_UserList','PMS_UserListToken',$data,'pms_users');
+
+      }
+
+	if (isset($_POST['PMS_Integration'])) {
+		
+		$data = array('site_key' => $_POST['site_key'],'secret_key' => $_POST['secret_key']);
+
+		$result = $handle->DBSELECT('setting_integration');
+		if ($result->num_rows=='1') {
+        
+        $run_query = $handle->DBUpdate('setting_integration',$data);
+
+        if ($run_query === TRUE) {
+					echo "update";
+					}else{
+					echo "error";
+					}
+        }
+        
+       else{
+
+       	$run_query = $handle->verifyToken('PMS_Integration','PMS_IntegrationToken',$data,'setting_integration');
+       	
+       }       
+		
+	}
+
+    /* add projects */
+
+    if (isset($_POST['PMS_Projects'])){
+    	if($_POST['PMS_Projects'] === md5('PMS_ProjectsToken')) {
+        
+    	$validator = array('success' => false, 'messages' => array());
+    	$assigned_team = implode(',', $_POST['assigned_team']);
+    	$data = array('projects_name' => $_POST['projects_name'],'description' => $_POST['description'],'start_date' => $_POST['start_date'],'end_date' => $_POST['end_date'],'client' => $_POST['client'],'assigned_team' => $assigned_team,'projects_tag' => $_POST['projects_tag']);
+				$dyn = new Admin_dashboard();
+				$conn = $dyn->DataBase_Connect();          
+		        $checkavailabity = $handle->DBSELECTWHERE('pms_projects','*', '' , $data);   
+                  
+              if ($checkavailabity->num_rows == 1) {	
+              	   if ($checkavailabity === TRUE) {
+
+                	$output['success'] = true;
+                    $output['messages'] = 'Already Projects Exits !!';			
+					
+					}
+					echo json_encode($output);
+
+                }
+
+                else
+				{   
+				
+                
+				$date_time = date('l jS \of F Y h:i:s');
+				
+				$sql = "INSERT INTO `pms_projects` (projects_name,description,start_date,end_date,client,assigned_team,projects_tag,time_stamp) VALUES ('".$_POST['projects_name']."', '".$_POST['description']."', '".$_POST['start_date']."', '".$_POST['end_date']."', '".$_POST['client']."', '".$assigned_team."', '".$_POST['projects_tag']."', '".$date_time."')";
+                $query = $conn->query($sql);
+				$last_id = mysqli_insert_id($conn);
+				if($last_id){
+
+				$output_dir = "common/upload/projects/upload_document/";/* Path for file upload */
+				$fileCount = count($_FILES["files"]['name']);
+				for($i=0; $i < $fileCount; $i++)
+
+				{
+				$RandomNum   = time();
+
+				$ImageName      = str_replace(' ','-',strtolower($_FILES['files']['name'][$i]));
+				$ImageType      = $_FILES['files']['type'][$i]; /*"image/png", image/jpeg etc.*/
+
+				$ImageExt = substr($ImageName, strrpos($ImageName, '.'));
+				$ImageExt       = str_replace('.','',$ImageExt);
+				$ImageName      = preg_replace("/\.[^.\s]{3,4}$/", "", $ImageName);
+				$NewImageName = $ImageName.'-'.$RandomNum.'.'.$ImageExt;
+
+				$ret[$NewImageName]= $output_dir.$NewImageName;
+
+				/* Try to create the directory if it does not exist */
+				if (!file_exists($output_dir . $last_id))
+				{
+				@mkdir($output_dir . $last_id, 0777);	
+				}
+
+				move_uploaded_file($_FILES["files"]["tmp_name"][$i],$output_dir.$last_id."/".$NewImageName );
+
+				$sql  = $conn->query("INSERT INTO `projects_documents` (ProjectId,upload_document) VALUES ('".$last_id."','".$NewImageName."')");
+				$query = $conn->query($sql);
+
+				}
+
+				}
+				if($query === TRUE) {
+				$output['success'] = true;
+				$output['messages'] = 'Add Projects Successfully!!';
+				} else {
+				$output['success'] = false;
+				$output['messages'] = 'Something Error Occur!!';
+				}
+
+				// close database connection
+				$conn->close();
+
+				echo json_encode($output);
+
+				}
+
+			}
+		}
+    /* end script */
+    
+
+    /* edit projects */
+
+    if (isset($_POST['PMS_EditProjects'])){
+    	if($_POST['PMS_EditProjects'] === md5('PMS_EditProjectsToken')) {
+
+    	$validator = array('success' => false, 'messages' => array());
+    	$assigned_team = implode(',', $_POST['assigned_team']);
+    	$data = array('projects_name' => $_POST['projects_name'],'description' => $_POST['description'],'start_date' => $_POST['start_date'],'end_date' => $_POST['end_date'],'client' => $_POST['client'],'assigned_team' => $assigned_team,'projects_tag' => $_POST['projects_tag']);
+				$dyn = new Admin_dashboard();
+				$conn = $dyn->DataBase_Connect();          
+		        $checkavailabity = $handle->DBSELECTWHERE('pms_projects','*', '' , $data);   
+                  
+              if ($checkavailabity->num_rows == 1) {	
+              	   if ($checkavailabity === TRUE) {
+
+                	$output['success'] = true;
+                    $output['messages'] = 'Already Projects Exits !!';			
+					
+					}
+					echo json_encode($output);
+
+                }
+
+                else
+				{                   
+				$date_time = date('l jS \of F Y h:i:s');
+				echo $sql = "UPDATE `pms_projects` SET projects_name='".$_POST['projects_name']."', description='".$_POST['description']."' , start_date='".$_POST['start_date']."', end_date='".$_POST['end_date']."', client='".$_POST['client']."', assigned_team='".$assigned_team."', projects_tag='".$_POST['projects_tag']."', time_stamp='".$date_time."' WHERE ProjectId='".$_POST['edit_id']."'" ;
+                $query = $conn->query($sql);
+			
+				if($query === TRUE) {
+				$output['success'] = true;
+				$output['messages'] = 'Update Projects Successfully!!';
+				} else {
+				$output['success'] = false;
+				$output['messages'] = 'Something Error Occur!!';
+				}
+
+				
+				$conn->close();
+
+				echo json_encode($output);
+
+				}
+
+			}
+		}
+    /* end script */
+
+    /* edit tasks */
+
+    if (isset($_POST['PMS_EditTasks'])){
+    	if($_POST['PMS_EditTasks'] === md5('PMS_EditTasksToken')) {
+        
+    	$validator = array('success' => false, 'messages' => array());
+    	$assigned_team = implode(',', $_POST['assigned_to']);
+    	$data = array('ProjectId' => $_POST['editprojects'],'task_title' => $_POST['task_title'],'description' => $_POST['description'],'assigned_to' => $assigned_team,'due_date' => $_POST['due_date'],'tasks_status' => $_POST['tasks_status']);
+				$dyn = new Admin_dashboard();
+				$conn = $dyn->DataBase_Connect();          
+		        $checkavailabity = $handle->DBSELECTWHERE('pms_tasks','*', '' , $data);   
+                  
+              if ($checkavailabity->num_rows == 1) {	
+              	   if ($checkavailabity === TRUE) {
+
+                	$output['success'] = true;
+                    $output['messages'] = 'Already Tasks Exits !!';			
+					
+					}
+					echo json_encode($output);
+                }
+                else
+				{                   
+				$date_time = date('l jS \of F Y h:i:s');
+				$sql = "UPDATE `pms_tasks` SET ProjectId='".$_POST['editprojects']."', task_title='".$_POST['task_title']."' , description='".$_POST['description']."', assigned_to='".$assigned_team."', due_date='".$_POST['due_date']."', tasks_status='".$_POST['tasks_status']."', time_stamp='".$date_time."' WHERE TaskId='".$_POST['TaskId']."'" ;
+                $query = $conn->query($sql);
+			
+				if($query === TRUE) {
+				$output['success'] = true;
+				$output['messages'] = 'Update Tasks Successfully!!';
+				} else {
+				$output['success'] = false;
+				$output['messages'] = 'Something Error Occur!!';
+				}				
+				$conn->close();
+				echo json_encode($output);
+				}
+
+			}
+		}
+    /* end edit tasks script */
+
+
+
+    if (isset($_POST['PMS_Tasks'])){
+    	if($_POST['PMS_Tasks'] === md5('PMS_TasksToken')) {
+
+    	$validator = array('success' => false, 'messages' => array());
+    	$assigned_to = implode(',', $_POST['assigned_to']);
+    	$data = array('ProjectId' => $_POST['projects'],'task_title' => $_POST['task_title'],'description' => $_POST['description'],'assigned_to' => $_POST['assigned_to'],'due_date' => $_POST['due_date'],'tasks_status' => $tasks_status);
+				$dyn = new Admin_dashboard();
+				$conn = $dyn->DataBase_Connect();          
+		        $checkavailabity = $handle->DBSELECTWHERE('pms_tasks','*', '' , $data);   
+                  
+              if ($checkavailabity->num_rows == 1) {	
+              	   if ($checkavailabity === TRUE) {
+                       echo 'already';
+                	// $output['success'] = true;
+                 //    $output['messages'] = 'Already Task Assigned To User!!';			
+					
+					}
+					//echo json_encode($output);
+
+                }
+
+                else
+				{   
+				         	
+				$date_time = date('l jS \of F Y h:i:s');
+				
+				$sql = "INSERT INTO `pms_tasks` (ProjectId,task_title,description,assigned_to,due_date,tasks_status,time_stamp) VALUES ('".$_POST['projects']."','".$_POST['task_title']."', '".$_POST['description']."', '".$assigned_to."', '".$_POST['due_date']."', '".$_POST['tasks_status']."',  '".$date_time."')";
+                $query = $conn->query($sql);
+				$last_id = mysqli_insert_id($conn);
+				if($last_id){
+				$output_dir = "common/upload/projects/tasks_attachment/";/* Path for file upload */
+				$fileCount = count($_FILES["files"]['name']);
+				for($i=0; $i < $fileCount; $i++)
+
+				{
+				$RandomNum   = time();
+
+				$ImageName      = str_replace(' ','-',strtolower($_FILES['files']['name'][$i]));
+				$ImageType      = $_FILES['files']['type'][$i]; /*"image/png", image/jpeg etc.*/
+
+				$ImageExt = substr($ImageName, strrpos($ImageName, '.'));
+				$ImageExt       = str_replace('.','',$ImageExt);
+				$ImageName      = preg_replace("/\.[^.\s]{3,4}$/", "", $ImageName);
+				$NewImageName = $ImageName.'-'.$RandomNum.'.'.$ImageExt;
+
+				$ret[$NewImageName]= $output_dir.$NewImageName;
+
+				/* Try to create the directory if it does not exist */
+				if (!file_exists($output_dir . $last_id))
+				{
+				@mkdir($output_dir . $last_id, 0777);	
+				}
+
+				move_uploaded_file($_FILES["files"]["tmp_name"][$i],$output_dir.$last_id."/".$NewImageName );
+
+				$sql  = $conn->query("INSERT INTO `tasks_documents` (TaskId,upload_document) VALUES ('".$last_id."','".$NewImageName."')");
+				$query = $conn->query($sql);
+
+				}
+
+				}
+				if($query === TRUE) {
+					echo 'success';
+				// $output['success'] = true;
+				// $output['messages'] = 'Add Tasks Successfully!!';
+				// } else {
+				// $output['success'] = false;
+				// $output['messages'] = 'Something Error Occur!!';
+				}
+				else{
+					echo 'error';
+				}
+
+				// close database connection
+				$conn->close();
+
+				//echo json_encode($output);
+
+				}
+
+			}
+		}
+       /* end script */
+
+ /* Delete Intrgation */
+
+if (isset($_POST['deltoken'])) {
+      
+      $run_query = $handle->DBDelete($_POST['table_name'],'WHERE '.$_POST['tablecolumnId'].' = '.$_POST['dataid'].' '); 
+
+			if ($run_query === TRUE){
+
+			    echo "delete";
+			}
+			else{
+			    echo "error";
+			}
+      
+
+}
+
+if (isset($_POST['deltoken_modal'])) {
+      $validator = array('success' => false, 'messages' => array());
+      $run_query = $handle->DBDelete($_POST['table_name'],'WHERE '.$_POST['tablecolumnId'].' = '.$_POST['dataid'].' '); 
+
+if($run_query === TRUE) {
+	$output['success'] = true;
+	$output['messages'] = 'Delete Successfully Record!!';
+} else {
+	$output['success'] = false;
+	$output['messages'] = 'Error while removing the member information';
+}	
+
+echo json_encode($output);
+
+
+}
+
+if(isset($_POST['projects'])){
+
+	$dyn = new Admin_dashboard();
+	$conn = $dyn->DataBase_Connect();
+    $sql = "SELECT assigned_team FROM `pms_projects` WHERE ProjectId='".$_POST['projects']."'";  
+    $result = $conn->query($sql);  
+	if ($result->num_rows > 0) {	
+	while($row = $result->fetch_assoc()) {
+	$assigned_team = $row['assigned_team'];
+	$count_assign = explode(',' , $assigned_team);
+	for($i = 0; $i < count($count_assign); $i++){
+	echo '<option value="'.$count_assign[$i].'">'.$count_assign[$i].'</option>';
+    
+    }
+    }       
+ } 
+
+
+}
+
+if (isset($_POST['edit_id'])){
+    	
+    $dyn = new Admin_dashboard();
+	$conn = $dyn->DataBase_Connect();
+	$editId = $_POST['edit_id'];
+	$sql = "SELECT * FROM pms_projects WHERE ProjectId = '".$editId."'";
+	$query = $conn->query($sql);
+	$result = $query->fetch_assoc();
+	$conn->close();
+	echo json_encode($result , JSON_UNESCAPED_SLASHES);	            
+}
+
+if (isset($_POST['task_edit_id'])){
+    $dyn = new Admin_dashboard();
+	$conn = $dyn->DataBase_Connect();
+	$taskId = $_POST['task_edit_id'];
+	$sql = "SELECT * FROM pms_tasks WHERE TaskId = '".$taskId."'";
+	$query = $conn->query($sql);
+	$result = $query->fetch_assoc();
+	$conn->close();
+	echo json_encode($result , JSON_UNESCAPED_SLASHES);	 
+	           
+}
+
+// if (isset($_POST['deltoken_modal'])) {
+//       $validator = array('delete' => false, 'messages' => array());
+//       $run_query = $handle->DBDelete($_POST['table_name'],'WHERE '.$_POST['tablecolumnId'].' = '.$_POST['dataid'].' '); 
+
+// 			if($run_query === TRUE) {			
+// 						$validator['delete'] = true;
+// 						$validator['messages'] = "Delete Successfully Record !!!";		
+// 						} else {		
+// 						$validator['delete'] = false;
+// 						$validator['messages'] = "Error while Delete information";
+// 						}
+// 	echo json_encode($validator);
+
+// }
+
+
+
+projects.php
+
+<?php
+include_once 'common/function.php';
+if($_SESSION['isLoggedIn']== FALSE){
+header('Location: '.DIRPATH_URL);
+exit();
+}
+else{
+$static = new Admin_dashboard();
+$static->header_script();
+$static->navbar();
+$static->sidenav();
+$ajaxcall = new FormHandle();
+?>
+
+<style type="text/css">
+input[type="file"] {
+  display: block;
+}
+.imageThumb {
+  max-height: 75px;
+  border: 2px solid;
+  padding: 1px;
+  cursor: pointer;
+}
+.pip {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+}
+.remove {
+  display: block;
+  background: #444;
+  border: 1px solid black;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.remove:hover {
+  background: white;
+  color: black;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<div id="wrapper">
+    <div class="main-content">
+	<div id="alert-success" class="alert alert-success" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+	<div id="alert-danger" class="alert alert-danger" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+	<div class="row small-spacing">
+	<div class="col-md-12 col-xs-12">
+		<div class="removeMessages"></div>
+			    <div class="box-content">
+
+<?php 
+$result = $ajaxcall->DBSELECT('pms_users','oauth_user_role','WHERE `oauth_user_role`= "owner" AND `id` = '.$_SESSION['userData']['id'].' ');
+if($result->num_rows == 1){?>  
+<h4 class="box-title">All Projects</h4>					
+           			<button class="btn btn-default pull pull-right" data-toggle="modal" data-target="#addprojects" id="ProjectsModalBtn">
+					<span class="glyphicon glyphicon-plus-sign"></span>	Add Projects
+				</button>
+				<br /> <br /> <br />
+				<table class="table table-striped table-bordered display" style="width:100%" id="datatable_viewprojects">
+					<thead>
+						<tr>
+							<th>S.no</th>
+							<th>Project Title</th>	
+							<th>Start Date</th>
+							<th>Deadline</th>
+							<th>Assigned Team</th>
+							<th>Client</th>															
+							<th>Progress</th>							
+							<th>Action</th>							
+						</tr>
+					</thead>
+					<tbody>
+							<?php $result_puser = $ajaxcall->DBSELECT('pms_projects');
+							if ($result_puser->num_rows > 0) {
+							$count=1;		   
+							while($row_puser = $result_puser->fetch_assoc()){
+							$ProjectId = $row_puser['ProjectId'];
+							$projects_name	 = $row_puser['projects_name'];
+							$start_date = $row_puser['start_date'];
+							$end_date = $row_puser['end_date'];
+							$client	 = $row_puser['client'];
+							$assigned_team = $row_puser['assigned_team'];
+							$progress_diff = abs(strtotime($end_date) - strtotime($start_date));
+							$progress_cal = $progress_diff / (60 * 60 * 24);
+							$progress_bar = floor(100/$progress_cal);
+							$count_assign = explode(',' , $assigned_team);
+							?>
+							<tr>								
+							<td><?php echo $count;?></td>
+							<td><?php echo $projects_name;?></td>									
+							<td><?php echo $start_date;?></td>
+							<td><?php echo $end_date;?></td>
+							<td>
+							<?php 
+								 for($i = 0; $i < count($count_assign); $i++){?>
+								 	<button style="font-size: 12px;line-height: 10px;padding: 5px 15px;" type="button" class="btn btn-info  waves-effect waves-light">
+								 	<?php echo $count_assign[$i];?>
+								 </button>
+								 <?php } 
+							?>								
+							</button></td>
+							<td><?php echo $client;?></td>
+							<td><div class="progress">
+							<div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $progress_bar;?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $progress_bar;?>%;">
+							<?php echo $progress_bar;?>%
+							</div>
+							</div></td>							
+							<td>
+							<button class="btn btn-danger" data-toggle="modal" data-target="#removeProjectsModal" role="button" onclick="Delete_DataTable('removeProjectsModal','modalremove_projects','createProjectsForm','datatable_viewprojects','PMS_DELETEToken_pms_projects-<?php echo $row_puser['ProjectId'];?>','<?php echo DIRPATH_URL."include/common/function.php";?>','ProjectId','del_<?php echo $row_puser['ProjectId'];?>','<?php echo $row_puser['ProjectId'];?>','pms_projects')" type="button">Delete</button>							
+							<button class="btn btn-primary" data-toggle="modal" data-target="#editProjectsModal" role="button" onclick="Edit_DataTable('editProjectsModal','modalremove_projects','editProjectsForm','datatable_viewprojects','PMS_GETToken_pms_projects-<?php echo $row_puser['ProjectId'];?>','<?php echo DIRPATH_URL."include/common/function.php";?>','ProjectId','edit_<?php echo $row_puser['ProjectId'];?>','<?php echo $row_puser['ProjectId'];?>','pms_projects')" type="button">Edit</button>																
+							</td>
+							</tr>
+							<?php $count++; } } ?>
+					</tbody>
+				</table>                
+                <!-- edit modal -->
+				<div class="modal fade" tabindex="-1" role="dialog" id="editProjectsModal">
+				<div class="modal-dialog" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"><span class="glyphicon glyphicon-plus-sign"></span>	Edit Projects</h4>
+				</div>
+				<form class="form-horizontal"  method="POST" id="editProjectsForm" enctype="multipart/form-data">
+				<input type="hidden" name="PMS_EditProjects"  id="PMS_EditProjects" value="<?php echo md5('PMS_EditProjectsToken'); ?>">
+				<div class="modal-body">
+				<div class="edit-messages"></div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Projects Title</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="projects_name"  name="projects_name" required placeholder="Enter Projects Name/Title">
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Description</label>
+				<div class="col-sm-10"> 
+				<textarea name="description" id="textarea" class="form-control"  maxlength="1000" rows="2" placeholder="This description has a limit of 1000 chars."></textarea>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Start Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="start_date" class="form-control"  placeholder="mm/dd/yyyy" id="datepicker-autoclose">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">End Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="end_date" class="form-control"  placeholder="mm/dd/yyyy" id="datepicker-autoclose2">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Client Name</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="client"  name="client" required placeholder="Enter Client Name">
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Assigned Team</label>
+					<div class="col-sm-10"> 
+						<select class="select2_2 form-control assigned_team"  id="assigned_team" name="assigned_team[]" multiple="multiple">
+
+							
+						<?php 
+						$result = $ajaxcall->DBSELECT('pms_users');
+						if ($result->num_rows > 0) {       
+						while($row = $result->fetch_assoc()){
+						$user_member = $row['user_member'];
+						$id = $row['id'];
+						?>
+						<option value="<?php echo $user_member;?>"><?php echo ucfirst($user_member);?></option>
+						<?php } }?>
+						</select>
+					</div>
+				</div>
+
+				<!-- <div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Upload Documentation</label>
+				<div class="col-sm-10"> 
+				<input type="file"   accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf, .zip"    name="files[]" id="files"  multiple required>     </div>
+				</div>-->   <!-- dropify-->
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Add Tags</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control"  id="projects_tag" required name="projects_tag" required placeholder="Example :-  #bugs ,  #modification , #wordpress ">
+				</div>
+				</div>
+
+				</div>
+				<div class="modal-footer editProjectsModal">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				
+				 <button type="submit"  class="btn btn-primary"  onclick="Modalajax('project_trigger','datatable_viewprojects','editProjectsModal','editProjectsForm',DIRPATH_URL.'include/common/function.php','tbody_id_project','Already Field Avaiable!!','Successfully Add Records','Something Error Occur!','Update Records!!','Delete Successfully Records!!')" >Save changes</button> 
+
+				</div>
+				</form> 
+				</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+				<!-- /edit modal -->				
+				<!-- add modal -->
+				<div class="modal fade" tabindex="-1" role="dialog" id="addprojects">
+				<div class="modal-dialog" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"><span class="glyphicon glyphicon-plus-sign"></span>	Add Projects</h4>
+				</div>
+				<form class="form-horizontal"  method="POST" id="createProjectsForm" enctype="multipart/form-data">
+				<input type="hidden" name="PMS_Projects"  id="PMS_Projects" value="<?php echo md5('PMS_ProjectsToken'); ?>">
+				<div class="modal-body">
+				<div class="messages"></div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Projects Title</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="projects_name" name="projects_name" required placeholder="Enter Projects Name/Title">
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Description</label>
+				<div class="col-sm-10"> 
+				<textarea name="description" id="textarea" class="form-control" maxlength="1000" rows="2" placeholder="This description has a limit of 1000 chars."></textarea>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Start Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="start_date" class="form-control" placeholder="mm/dd/yyyy" id="datepicker-autoclose">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">End Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="end_date" class="form-control" placeholder="mm/dd/yyyy" id="datepicker-autoclose2">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Client Name</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="client" name="client" required placeholder="Enter Client Name">
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Assigned Team</label>
+					<div class="col-sm-10"> 
+						<select class="select2_2 form-control assigned_team" id="assigned_team" name="assigned_team[]" multiple="multiple">
+						<?php 
+						$result = $ajaxcall->DBSELECT('pms_users');
+						if ($result->num_rows > 0) {       
+						while($row = $result->fetch_assoc()){
+						$user_member = $row['user_member'];
+						$id = $row['id'];
+						?>
+						<option value="<?php echo $user_member;?>"><?php echo ucfirst($user_member);?></option>
+						<?php } }?>
+						</select>
+					</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Upload Documentation</label>
+				<div class="col-sm-10"> 
+				<input type="file"   accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf, .zip"    name="files[]" id="files"  multiple required>     </div>
+				</div><!-- dropify-->
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Add Tags</label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="projects_tag" required name="projects_tag" required placeholder="Example :-  #bugs ,  #modification , #wordpress ">
+				</div>
+				</div>
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+				<button type="submit"  class="btn btn-primary"  onclick="Modalajax('project_trigger','datatable_viewprojects','ProjectsModalBtn','createProjectsForm',DIRPATH_URL.'include/common/function.php','tbody_id_project','Already Field Avaiable!!','Successfully Add Records','Something Error Occur!','Update Records!!','Delete Successfully Records!!')" >Save changes</button>
+				</div>
+				</form> 
+				</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+				<!-- /add modal -->
+				<!--add remove delete popup -->
+                <?php $ajaxcall->Modal_FormRemove('removeProjectsModal' , 'Remove Projects' , 'modalremove_projects');?>
+                <!-- /end script remove popup modal -->
+				</div>		
+				</div>		
+				</div>	
+				</div>
+				
+<?php } else{?>
+	        <table class="table table-striped table-bordered display" style="width:100%" id="datatable_viewprojects">
+					<thead>
+						<tr>
+							<th>S.no</th>
+							<th>Project Title</th>	
+							<th>Start Date</th>
+							<th>Deadline</th>
+							<th>Assigned Team</th>
+							<th>Client</th>															
+							<th>Progress</th>																			
+						</tr>
+					</thead>
+					<tbody>
+							<?php $result_puser = $ajaxcall->DBSELECT('pms_projects','*','WHERE '.$_POST['tablecolumnId'].' = '.$_POST['dataid'].' ');
+							if ($result_puser->num_rows > 0) {
+							$count=1;		   
+							while($row_puser = $result_puser->fetch_assoc()){
+							$ProjectId = $row_puser['ProjectId'];
+							$projects_name	 = $row_puser['projects_name'];
+							$start_date = $row_puser['start_date'];
+							$end_date = $row_puser['end_date'];
+							$client	 = $row_puser['client'];
+							$assigned_team = $row_puser['assigned_team'];
+							$progress_diff = abs(strtotime($end_date) - strtotime($start_date));
+							$progress_cal = $progress_diff / (60 * 60 * 24);
+							$progress_bar = floor(100/$progress_cal);
+							$count_assign = explode(',' , $assigned_team);
+							?>
+							<tr>								
+							<td><?php echo $count;?></td>
+							<td><?php echo $projects_name;?></td>									
+							<td><?php echo $start_date;?></td>
+							<td><?php echo $end_date;?></td>
+							<td>
+								<?php 
+								 for($i = 0; $i < count($count_assign); $i++){?>
+								 	<button style="font-size: 12px;line-height: 10px;padding: 5px 15px;" type="button" class="btn btn-info  waves-effect waves-light">
+								 	<?php echo $count_assign[$i];?>
+								 </button>
+								 <?php }?>
+								
+							</button></td>
+							<td><?php echo $client;?></td>
+							<td><div class="progress">
+							<div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $progress_bar;?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $progress_bar;?>%;">
+							<?php echo $progress_bar;?>%
+							</div>
+							</div></td>							
+							</tr>
+							<?php $count++;}}?>
+					</tbody>
+				</table>
+<?php }?> 
+<?php $static->footer_script();?>            
+	<script type="text/javascript">
+	function Edit_DataTable(datatarget_id,modalremove,form_id,table_id,token,redirect_url,tablecolumnId,edit_id,id,table_name){
+	    if(id) {
+		$("#edit_id").remove();		
+		$.ajax({
+			url: redirect_url,
+			type: 'post',
+			data: {tablecolumnId : tablecolumnId, edit_id : id, edit_token : token, table_name : table_name},
+			dataType: 'json',
+			success:function(response) {
+				$("#projects_name").val(response.projects_name);
+				$("#datepicker-autoclose").val(response.start_date);
+				$("#datepicker-autoclose2").val(response.end_date);
+				$("#client").val(response.client);
+				$("#projects_tag").val(response.projects_tag);
+				$('.cw:first .ci').addClass('red');
+				$(".assigned_team:first .select2-container--default").addClass("select2-container--focus select2-container--open select2-container--above");
+				//var tArrx = new Array(response.assigned_team);	
+				var valArr = [response.assigned_team];
+				i = 0, size = valArr.length,
+				$options = $('#assigned_team option');
+
+				for(i; i < size; i++){
+				//$options.filter('[value="'+valArr[i]+'"]').prop('selected', true).addClass("select2-selection__choice");
+				$options.filter('[value="'+valArr[i]+'"]').addClass("select2-selection__choice");
+
+				}			
+				// var test = $("#assigned_team").val(tArrx).trigger("change");
+				// console.log(test);
+				$("#textarea").val(response.description);	
+				$("."+datatarget_id).append('<input type="hidden" name="edit_id" id="edit_id" value="'+response.ProjectId+'"/>');
+				
+				// $("#"+form_id).unbind('submit').bind('submit', function() {
+
+				// 		$.ajax({
+				// 			    url: redirect_url,  
+				//                          type: 'POST',
+				//                          data:  new FormData(this),
+				//                          dataType: 'json',	                     
+				//                          contentType: false,
+				//                          cache: false,
+				//                          processData:false,
+				// 			success:function(response) {
+				// 				if(response.success == true) {
+				// 					$(".edit-messages").html('<div class="alert alert-success alert-dismissible" role="alert">'+
+				// 					  '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+				// 					  '<strong> <span class="glyphicon glyphicon-ok-sign"></span> </strong>'+response.messages+
+				// 					'</div>');									
+				// 					table_id.ajax.reload(null, false);									
+				// 				} else {
+				// 					$(".edit-messages").html('<div class="alert alert-warning alert-dismissible" role="alert">'+
+				// 					  '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+				// 					  '<strong> <span class="glyphicon glyphicon-exclamation-sign"></span> </strong>'+response.messages+
+				// 					'</div>')
+				// 				}
+				// 			} 
+				// 		}); 
+				// 	return false;
+				// });
+
+			} // /success
+		    }); // /fetch selected member info
+		}
+	}
+
+				var table = $('#datatable_viewprojects').DataTable({
+				'destroy': true,
+				'paging': true,
+				'lengthChange': true,
+				'searching': true,
+				'ordering': true,
+				'info': true,
+				'autoWidth': true
+				});
+                
+                
+				
+				</script>
+
+				 <script type="text/javascript">
+				$(document).ready(function() {
+				if (window.File && window.FileList && window.FileReader) {
+				$("#files").on("change", function(e) {
+				var files = e.target.files,
+				filesLength = files.length;
+				for (var i = 0; i < filesLength; i++) {
+				var f = files[i]
+				var fileReader = new FileReader();
+				fileReader.onload = (function(e) {
+				var file = e.target;
+				$("<span class=\"pip\">" +
+				"<img class=\"imageThumb\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/>" +
+				"<br/><span class=\"remove\">Remove image</span>" +
+				"</span>").insertAfter("#files");
+				$(".remove").click(function(){
+				$(this).parent(".pip").remove();
+				//$('#files').val("");
+				});
+
+				});
+				fileReader.readAsDataURL(f);
+				}
+				});
+				} else {
+				alert("Your browser doesn't support to File API")
+				}
+				});
+				</script> 
+<?php }?>
+
+
+tasks.php
+
+<?php
+include_once 'common/function.php';
+if($_SESSION['isLoggedIn']== FALSE){
+header('Location: '.DIRPATH_URL);
+exit();
+}
+else{
+$static = new Admin_dashboard();
+$static->header_script();
+$static->navbar();
+$static->sidenav();
+$ajaxcall = new FormHandle();
+?>
+
+<style type="text/css">
+input[type="file"] {
+  display: block;
+}
+.imageThumb {
+  max-height: 75px;
+  border: 2px solid;
+  padding: 1px;
+  cursor: pointer;
+}
+.pip {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+}
+.remove {
+  display: block;
+  background: #444;
+  border: 1px solid black;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.remove:hover {
+  background: white;
+  color: black;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<div id="wrapper">
+    <div class="main-content">
+	<div id="alert-success" class="alert alert-success" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+	<div id="alert-danger" class="alert alert-danger" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+	<div class="row small-spacing">
+	<div class="col-md-12 col-xs-12">
+		<div class="removeMessages"></div>
+			    <div class="box-content">
+	        <h4 class="box-title">All Tasks</h4>	
+<?php 
+$result = $ajaxcall->DBSELECT('pms_users','oauth_user_role','WHERE `oauth_user_role`= "owner" AND `id` = '.$_SESSION['userData']['id'].' ');
+if ($result->num_rows == 1) {?> 
+
+           			<button class="btn btn-default pull pull-right" data-toggle="modal" data-target="#addtasks" id="TasksModalBtn">
+					<span class="glyphicon glyphicon-plus-sign"></span>	Add Tasks
+				</button>
+				<br/><br/><br/>
+				<table class="table table-striped table-bordered display" style="width:100%" id="datatable_viewtasks">
+					<thead>
+						<tr>
+							<th>S.no</th>
+							<th>Project Name</th>								
+							<th>Task Title</th>															
+							<th>Assigned To</th>
+							<th>Due  Date</th>
+							<th>Status</th>	
+							<th>Action</th>>							
+						</tr>
+					</thead>
+					<tbody>
+							<?php $result_puser = $ajaxcall->DBSELECT('pms_tasks');
+							if ($result_puser->num_rows > 0) {
+							$count=1;		   
+							while($row_puser = $result_puser->fetch_assoc()){
+                            $ProjectId = $row_puser['ProjectId'];
+							$TaskId = $row_puser['TaskId'];
+							
+							$task_title	 = $row_puser['task_title'];
+							$assigned_to = $row_puser['assigned_to'];
+							$count_assign = explode(',' , $assigned_to);
+							$due_date	 = $row_puser['due_date'];														
+							$tasks_status = $row_puser['tasks_status'];
+							
+							?>
+							<?php 
+							$sql_fetch = $ajaxcall->DBSELECT('pms_projects','*','WHERE `ProjectId` = "'.$ProjectId.'" ');
+
+							$fetch_project = $sql_fetch->fetch_assoc();
+							?>
+							<tr>								
+							<td><?php echo $count;?></td>
+						    <td><?php echo $fetch_project['projects_name'];?></td>	
+							<td><?php echo $task_title;?></td>									
+							<td>
+
+								<?php 
+								 for($i = 0; $i < count($count_assign); $i++){?>
+								 	<button style="font-size: 12px;line-height: 10px;padding: 5px 15px;" type="button" class="btn btn-info  waves-effect waves-light">
+								 	<?php echo $count_assign[$i];?>
+								 </button>
+ 
+
+								 <?php } 
+
+							     ?>
+								
+							</button></td>
+														
+							<td><?php echo $due_date;?></td>							
+							<td><?php echo $tasks_status;?></td>
+							<td>
+							<button class="btn btn-danger" data-toggle="modal" data-target="#removeTasksModal" role="button" onclick="Delete_DataTable('removeTasksModal','modalremove_tasks','createTasksForm','datatable_viewtasks','PMS_DELETEToken_pms_tasks-<?php echo $row_puser['TaskId'];?>','<?php echo DIRPATH_URL."include/common/function.php";?>','TaskId','del_<?php echo $row_puser['TaskId'];?>','<?php echo $row_puser['TaskId'];?>','pms_tasks')" type="button">Delete</button>	
+							<button class="btn btn-primary" data-toggle="modal" data-target="#editTasksModal" role="button" onclick="Edit_DataTable('editTasksModal','modalremove_tasks','editTasksForm','datatable_viewtasks','PMS_GETToken_pms_tasks-<?php echo $row_puser['TaskId'];?>','<?php echo DIRPATH_URL."include/common/function.php";?>','TaskId','edit_<?php echo $row_puser['TaskId'];?>','<?php echo $row_puser['TaskId'];?>','pms_tasks')" type="button">Edit</button>						
+							</td>
+							</tr>
+							<?php $count++; } } ?>
+					</tbody>
+				</table>
+
+				<!-- add modal -->
+				<div class="modal fade" tabindex="-1" role="dialog" id="addtasks">
+				<div class="modal-dialog" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"><span class="glyphicon glyphicon-plus-sign"></span>	Add Tasks</h4>
+				</div>
+				<form class="form-horizontal"  method="POST" id="createTasksForm">
+				<input type="hidden" name="PMS_Tasks"  id="PMS_Tasks" value="<?php echo md5('PMS_TasksToken'); ?>">
+				<div class="modal-body">
+				<div class="messages"></div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Projects Tasks</label>
+					<div class="col-sm-10"> 
+						<select class=" form-control" id="projects"  onchange="projectslist('<?php echo DIRPATH_URL."include/common/function.php";?>')"  name="projects">
+							<option value="">Select Projects</option>
+						<?php 
+						$result = $ajaxcall->DBSELECT('pms_projects');
+						if ($result->num_rows > 0) {       
+						while($row = $result->fetch_assoc()){
+						$projects_name = $row['projects_name'];
+						$ProjectId = $row['ProjectId'];
+						?>
+						<option value="<?php echo $ProjectId;?>"><?php echo ucfirst($projects_name);?></option>
+						<?php } }?>
+						</select>
+					</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Title Tasks </label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="task_title" name="task_title" required placeholder="Enter Tasks Title">
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Description</label>
+				<div class="col-sm-10"> 
+				<textarea name="description" id="textarea" class="form-control" maxlength="1000" rows="2" placeholder="This description has a limit of 1000 chars."></textarea>
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Assigned To</label>
+					<div class="col-sm-10"> 
+						<select class="select2_2 form-control assigned_to" id="assigned_to" name="assigned_to[]" multiple="multiple">
+							<option value="">Select Option</option>
+						
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Due Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="due_date" class="form-control" placeholder="mm/dd/yyyy" id="datepicker-autoclose">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+                
+                
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Attached Documentation</label>
+				<div class="col-sm-10"> 
+				<input type="file"   accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf, .zip"    name="files[]" id="files"  multiple required>     </div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Status</label>
+				<div class="col-sm-10"> 
+				<select required name="tasks_status" id="tasks_status" class="form-control">
+				<option value="To Do">To Do</option>
+				<option value="Testing">Testing</option>
+				<option value="Pending">Pending</option>
+				<option value="Inprogress">Inprogress</option>
+				<option value="Done">Done</option>
+				</select>
+				</div>
+				</div>
+
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="submit"  class="btn btn-primary"  onclick="Modalajax('tasks_trigger','datatable_viewtasks','TasksModalBtn','createTasksForm',DIRPATH_URL.'include/common/function.php','tbody_id_tasks','Already Field Avaiable!!','Successfully Add Records','Something Error Occur!','Update Records!!','Delete Successfully Records!!')" >Save changes</button>
+				</div>
+				</form> 
+				</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+				<!-- /add modal -->
+
+				  <!-- edit modal -->
+				<div class="modal fade" tabindex="-1" role="dialog" id="editTasksModal">
+				<div class="modal-dialog" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"><span class="glyphicon glyphicon-plus-sign"></span>	Edit Tasks</h4>
+				</div>
+				<form class="form-horizontal" method="post" id="editTasksForm" enctype="multipart/form-data">
+				<input type="hidden" name="PMS_EditTasks"  id="PMS_EditTasks" value="<?php echo md5('PMS_EditTasksToken'); ?>">
+				<div class="modal-body">
+				<div class="messages"></div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Projects Tasks</label>
+					<div class="col-sm-10"> 
+						<select class=" form-control assigned_team" id="editprojects"  onchange="projectsEditlist('<?php echo DIRPATH_URL."include/common/function.php";?>')"  name="editprojects">
+							<option value="">Select Projects</option>
+						<?php 
+						$result = $ajaxcall->DBSELECT('pms_projects');
+						if ($result->num_rows > 0) {       
+						while($row = $result->fetch_assoc()){
+						$projects_name = $row['projects_name'];
+						$ProjectId = $row['ProjectId'];
+						?>
+						<option value="<?php echo $ProjectId;?>"><?php echo ucfirst($projects_name);?></option>
+						<?php } }?>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Title Tasks </label>
+				<div class="col-sm-10"> 
+				<input type="text" class="form-control" id="edittask_title" name="task_title" required placeholder="Enter Tasks Title">
+				</div>
+				</div>
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Description</label>
+				<div class="col-sm-10"> 
+				<textarea name="description" id="edittextarea" class="form-control" maxlength="1000" rows="2" placeholder="This description has a limit of 1000 chars."></textarea>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Assigned To</label>
+					<div class="col-sm-10"> 
+						<select class="select2_2 form-control assigned_to" id="edit_assigned_to" name="assigned_to[]" multiple="multiple">
+							<option value="">Select Option</option>
+						
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Due Date</label>
+				<div class="col-sm-10"> 
+				<div class="input-group">
+				<input type="text" name="due_date" class="form-control" placeholder="mm/dd/yyyy" id="datepicker-autoclose2">
+				<span class="input-group-addon bg-primary text-white"><i class="fa fa-calendar"></i></span>
+				</div>
+				</div>
+				</div>
+
+				<div class="form-group"> 
+				<label for="name" class="col-sm-2 control-label">Status</label>
+				<div class="col-sm-10"> 
+				<select required name="tasks_status" id="edittasks_status" class="form-control">
+				<option value="To Do">To Do</option>
+				<option value="Testing">Testing</option>
+				<option value="Pending">Pending</option>
+				<option value="Inprogress">Inprogress</option>
+				<option value="Done">Done</option>
+				</select>
+				</div>
+				</div>
+
+				</div>
+				
+				<div class="modal-footer editTasksModal">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				
+
+				<button type="submit"  class="btn btn-primary"  onclick="Modalajax('tasks_trigger','datatable_viewtasks','editTasksModal','editTasksForm',DIRPATH_URL.'include/common/function.php','tbody_id_tasks','Already Field Avaiable!!','Successfully Add Records','Something Error Occur!','Update Records!!','Delete Successfully Records!!')" >Save changes</button>
+				</div>
+				</form> 
+				</div><!-- /.modal-content -->
+				</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+				<!-- /edit modal -->
+
+
+				<!--add remove delete popup -->
+                <?php $ajaxcall->Modal_FormRemove('removeTasksModal' , 'Remove Tasks' , 'modalremove_tasks');?>
+                <!-- /end script remove popup modal -->
+				</div>		
+				</div>		
+				</div>	
+				</div>
+				
+
+
+<?php } else {?>
+				<table class="table table-striped table-bordered display" style="width:100%" id="datatable_viewtasks">
+					<thead>
+						<tr>
+							<th>S.no</th>
+							<th>Project Name</th>								
+							<th>Task Title</th>															
+							<th>Assigned To</th>
+							<th>Due  Date</th>
+							<th>Status</th>								
+						</tr>
+					</thead>
+					<tbody>
+							<?php $result_puser = $ajaxcall->DBSELECT('pms_tasks');
+							if ($result_puser->num_rows > 0) {
+							$count=1;		   
+							while($row_puser = $result_puser->fetch_assoc()){
+                            $ProjectId = $row_puser['ProjectId'];
+							$TaskId = $row_puser['TaskId'];							
+							$task_title	 = $row_puser['task_title'];
+							$assigned_to = $row_puser['assigned_to'];
+							$count_assign = explode(',' , $assigned_to);
+							$due_date	 = $row_puser['due_date'];														
+							$tasks_status = $row_puser['tasks_status'];							
+							?>
+							<?php 
+							$sql_fetch = $ajaxcall->DBSELECT('pms_projects','*','WHERE `ProjectId` = "'.$ProjectId.'" ');
+							$fetch_project = $sql_fetch->fetch_assoc();
+							?>
+							<tr>								
+							<td><?php echo $count;?></td>
+						    <td><?php echo $fetch_project['projects_name'];?></td>	
+							<td><?php echo $task_title;?></td>									
+							<td>
+								<?php 
+								 for($i = 0; $i < count($count_assign); $i++){?>
+								 	<button style="font-size: 12px;line-height: 10px;padding: 5px 15px;" type="button" class="btn btn-info  waves-effect waves-light">
+								 	<?php echo $count_assign[$i];?>
+								 </button>
+								 <?php }?>
+								
+							</button></td>							
+							<td><?php echo $due_date;?></td>							
+							<td><?php echo $tasks_status;?></td>							
+							</tr>
+							<?php $count++; } } ?>
+					</tbody>
+				</table>
+
+				<?php } ?>
+				<?php $static->footer_script();?>
+
+				<script type="text/javascript"> 
+		function Edit_DataTable(datatarget_id,modalremove,form_id,table_id,token,redirect_url,tablecolumnId,edit_id,id,table_name){
+	    if(id) {
+
+		$("#TaskId").remove();		
+		$.ajax({
+			url: redirect_url,
+			type: 'post',
+			data: {tablecolumnId : tablecolumnId, task_edit_id : id, edit_token : token, table_name : table_name},
+			dataType: 'json',
+			success:function(response) {
+				$("#editprojects option[value='"+response.ProjectId+"']").prop('selected', true);
+				//$("#projects").val(response.projects);
+				$("#edittask_title").val(response.task_title);
+				$("#edittextarea").val(response.description);
+				$("#datepicker-autoclose2").val(response.due_date);
+				$("#edittasks_status").val(response.tasks_status);
+				//$("#taskedit_id").val(response.TaskId);
+			    $("."+datatarget_id).append('<input type="hidden" name="TaskId" id="TaskId" value="'+response.TaskId+'"/>');
+				// $("#assigned_to").val(response.assigned_to);
+				//  $(".assigned_team span: nth-child(1)").addClass("select2-container--focus select2-container--open select2-container--above");
+				// //var tArrx = new Array(response.assigned_team);	
+				// var valArr = [response.assigned_to];
+				// i = 0, size = valArr.length,
+				// $options = $('#assigned_to option');
+
+				// for(i; i < size; i++){
+				// $options.filter('[value="'+valArr[i]+'"]').prop('selected', true).addClass("select2-selection__choice");
+				// $options.filter('[value="'+valArr[i]+'"]').addClass("select2-selection__choice");
+
+				// }			
+				// var test = $("#assigned_team").val(tArrx).trigger("change");
+				// console.log(test);
+					
+				
+				
+			
+				
+			} // /success
+		    }); // /fetch selected member info
+		}
+	}
+		
+				function projectslist(DIRPATH_URL)
+				{
+				var projects = $('#projects').val();
+				
+
+				$.ajax({
+				type:'POST',
+				url:  DIRPATH_URL,
+				data:'projects='+projects,
+				success:function(html){
+				$('#assigned_to').html(html);
+				
+				}
+				});
+				}
+				function projectsEditlist(DIRPATH_URL)
+				{
+				var projects = $('#editprojects').val();
+				
+
+				$.ajax({
+				type:'POST',
+				url:  DIRPATH_URL,
+				data:'projects='+projects,
+				success:function(html){
+				$('#edit_assigned_to').html(html);
+				
+				}
+				});
+				}
+				</script>
+				
+				<script type="text/javascript">
+				var table = $('#datatable_viewtasks').DataTable({
+				'destroy': true,
+				'paging': true,
+				'lengthChange': true,
+				'searching': true,
+				'ordering': true,
+				'info': true,
+				'autoWidth': true
+				});
+
+				</script>
+				 <script type="text/javascript">
+				$(document).ready(function() {
+				if (window.File && window.FileList && window.FileReader) {
+				$("#files").on("change", function(e) {
+				var files = e.target.files,
+				filesLength = files.length;
+				for (var i = 0; i < filesLength; i++) {
+				var f = files[i]
+				var fileReader = new FileReader();
+				fileReader.onload = (function(e) {
+				var file = e.target;
+				$("<span class=\"pip\">" +
+				"<img class=\"imageThumb\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/>" +
+				"<br/><span class=\"remove\">Remove image</span>" +
+				"</span>").insertAfter("#files");
+				$(".remove").click(function(){
+				$(this).parent(".pip").remove();
+				//$('#files').val("");
+				});
+
+				});
+				fileReader.readAsDataURL(f);
+				}
+				});
+				} else {
+				alert("Your browser doesn't support to File API")
+				}
+				});
+				</script> 
+				<?php } ?>
