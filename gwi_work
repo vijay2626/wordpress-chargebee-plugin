@@ -1,0 +1,672 @@
+template-product-page.php
+
+<?php
+
+// =============================================================================
+// TEMPLATE NAME: Product Page Template
+// -----------------------------------------------------------------------------
+// =============================================================================
+
+get_header();
+    $area = $_GET['area'];
+    if($area)
+    {
+       $arealocation = $area;
+    }
+    else
+    {
+       $arealocation = '';
+    }
+?>
+<style type="text/css">
+.onclicked,.onclick{
+  background: #fd7065 !important;
+}
+/*.product_steptext ul li:hover{
+  background: #fd7065 !important;
+}
+.product_steptext ul li:hover h1 b, .product_steptext ul li:hover h2 {
+  color: #fff!important;
+}*/
+.product_steptext ul li{cursor: pointer; position: relative;}
+.product_steptext ul li input[type="checkbox"], .product_steptext ul li input[type="radio"]{   position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; width: 100%; height: 100%;opacity: 0;}
+.product_steptext ul li.onclicked h1 b, .product_steptext ul li.onclicked h2, .product_steptext ul li.onclick h1 b, .product_steptext ul li.onclick h2 {   color: #fff!important;}
+.residentialbox{padding: 0 4%;}
+.stepfirst .homebanner form{ position: relative;}
+.stepfirst .homebanner form p.forexa { position: absolute; font-size: 13px; font-style: italic;top: 100%; left: 16px;}
+.fibernot_lagecy p {    font-size: 18px;    color: #5b616b;    line-height: 26px;}
+.fibernot_lagecy p a {    color: #fd7065;    font-style: italic;}
+.try_another { color: #fff; cursor: pointer; margin-top: 40px; background-color: #f26e65; width: 200px;
+    box-shadow: 0 5px 20px 0px rgba(0,0,0,0.2); font-size: 14px; font-weight: bold; padding: 1px;border-radius: 24px;    line-height: 40px;    text-align: center;}
+.fiber_contect {    margin-top: 50px;}
+.form_msg { font-size: 20px; margin-top: 60px;color: #333333;font-family: "Raleway",sans-serif;font-weight: 600;
+    font-style: italic;}
+@media (min-width: 768px){
+  .fixedtop { position: fixed; top: 0; right: 0;z-index: 99; background: #fff;width: 300px;padding: 10px;padding-top: 5px;}
+  .fixedtop h1 {padding: 10px 30px;    margin: 0;}
+  .price_box .fixedtop p {margin: 5px;}
+  .price_box .fixedtop h2 {  font-size: 16px;    margin-bottom: 5px;}
+}
+@media (max-width: 767px){
+  .fixedtop {position: fixed;top: 0;background: #fff; z-index: 99999;width: 100%;left: 0;right: 0;}
+  .price_box .fixedtop h2 {padding: 5px 5px 2px 5px;  font-size: 14px;}
+  .price_box .fixedtop h1 {  padding: 10px; margin: 0;  font-size: 20px;}
+  .price_box .fixedtop p { display: none;}
+}
+@media (max-width: 991px){
+  .residentialbox{padding:0px;}
+  .stepfirst .homebanner form p.forexa {top: 50px;  line-height: 15px;}
+  .homebanner form input[type="button"]{    margin-top: 20px;}
+}
+</style>
+<div class="x-main full">
+    <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
+        <?php the_content(); ?>    
+    <?php endwhile; endif; ?>
+    <div class="x-section">
+      <div class="x-container max width">
+        <div class="row residentialbox">
+            <div class="col-md-12 col-lg-10">
+                <div class="product_steptext">
+                    <div class="stepfirst">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h1><b>STEP 1:</b></h1>                             
+                                <div class="homebanner">
+                                    <form method="post" id="all_key_enter">
+                                        <input type="text"  id="searchaddress"  value="<?php echo $arealocation; ?>" placeholder="Enter full address to see access." style="outline: none;">
+                                        <p class="forexa">(For Example: 123 Main St, South Portland, Maine, 04106)</p>
+                                        <input type="button" id="find_Address" onclick="CheckAddress()" value="Go" class="btndisable">
+                                    </form>
+                                    <div id='loader' style='display:none;'>
+                                      <i class="fa fa-spinner fa-spin"></i> loading....
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <?php $step_first = get_field('step_first');  
+                                if( $step_first ): ?>
+                                   <div class="price_box" ><!-- style="padding-top:10%;" -->
+                                      <div id="pricebox">
+                                        <h2><?php echo $step_first['title_text']; ?></h2>
+                                          <h1><b><sup>$</sup><span id="update_price">0<!-- <?php //echo $step_first['price']; ?> --></span></b>/mo</h1> 
+                                          <p><?php echo $step_first['content']; ?></p>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>                               
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: none;" class="fiber_response">
+                      <div class="stepsecond">
+                          <?php $step_second = get_field('step_second');  
+                          if( $step_second ): ?>
+                          <h1><b>STEP 2:</b> <i><?php echo $step_second['title_text']; ?></i></h1>
+                          <ul class="art-vmenu">
+                              <?php $secondplan_lists = $step_second['plan_list']; 
+                              //print_r($secondplan_lists);
+                              if( $secondplan_lists ):
+                                  foreach($secondplan_lists as $secondplan_list) {
+                              ?>
+                              <li  class="current" value="<?php echo $secondplan_list['plan_price']; ?>"><h1><?php $image_icon = $secondplan_list['image_icon']; if( $image_icon ){ ?><img src="<?php echo $image_icon; ?>" alt="speed"><?php } ?> <b><?php echo $secondplan_list['plan_speed']; ?></b> <span><a href="#"  data-price="<?php echo $secondplan_list['plan_price']; ?>" data-toggle="tooltip" data-placement="top" title="<?php echo $secondplan_list['plan_tooltip_text']; ?>">?</a></span></h1><h2><b><sup>$</sup><span class="price1"><?php echo $secondplan_list['plan_price']; ?></span></b>/mo</h2> <input type="radio" name="takeplane" id="hidden_price1" value="<?php echo $secondplan_list['plan_price']; ?>"> </li>
+                                
+                              
+
+                              <?php } endif; ?> 
+                          </ul>
+                          <?php endif; ?> 
+                      </div>
+                      <div class="stepthird">
+                          <?php $step_third = get_field('step_third');  
+                          if( $step_third ): ?>
+                          <h1><b>STEP 3:</b> <i><?php echo $step_third['title_text']; ?></i></h1>
+                          <ul class="art-vmenu1">
+                              <?php $thirdplan_lists = $step_third['plan_list']; 
+                              //print_r($secondplan_lists);
+                              if( $thirdplan_lists ):
+                                $x=2;
+                                  foreach($thirdplan_lists as $thirdplan_list) {
+                              ?>
+                              <li class="current_class" value="<?php echo $thirdplan_list['plan_price']; ?>"><h1><?php $image_icon = $thirdplan_list['image_icon']; if( $image_icon ){ ?><img src="<?php echo $image_icon; ?>" alt="speed"><?php } ?> <b><?php echo $thirdplan_list['plan_speed']; ?></b> <span><a href="#" data-price="<?php echo $thirdplan_list['plan_price']; ?>" data-toggle="tooltip" data-placement="top" title="<?php echo $thirdplan_list['plan_tooltip_text']; ?>">?</a></span></h1><h2><b><sup>$</sup><span class="price2"><?php echo $thirdplan_list['plan_price']; ?></span></b>/mo</h2>
+                                <input type="checkbox" id="hidden_price<?php echo $x; ?>" value="<?php echo $thirdplan_list['plan_price']; ?>">
+                              </li>
+                              <?php $x++; } endif; ?> 
+                          </ul>
+                          <?php endif; ?> 
+                      </div>
+                      <?php $step_four = get_field('step_four');  
+                      if( $step_four ): ?>
+                         <div class="stepfour">
+                              <h1><b>STEP 4:</b> <i><?php echo $step_four['title_text']; ?> <a href="tel:<?php echo $step_four['contact_number']; ?>"><?php echo $step_four['contact_number']; ?></a></i></h1>
+                          </div>
+                      <?php endif; ?> 
+
+                        <!-- <div class="try_another">SEARCH AGAIN</div> -->
+                        <div class="form_msg">Or we'll contact you. Fill out the form below for a call from one of our GWI representatives:</div>
+                        <div class="fiber_contect">
+                          <?php echo do_shortcode('[contact-form-7 id="1120" title="Fiber Contact Form"]');?>
+                        </div>
+                    </div> 
+
+                    <div style="display: none;" class="fibernot_available">                   
+                        <h1><b>Bummer!</b></h1>                   
+                        <p>We’re sorry Fiber Internet isn’t available in your area. Please submit your information below so we can let you know when Fiber does become available. Contact us today to get connected <a href="tel:1-207-494-2000">207.GWI.2000</a>.</p>
+                        <div class="try_another">SEARCH AGAIN</div>
+                        <div class="fiber_contect">
+                          <?php echo do_shortcode('[contact-form-7 id="1120" title="Fiber Contact Form"]');?>
+                        </div>
+                    </div>  
+                    <div style="display: none;" class="fibernot_lagecy">                   
+                        <h1><b>DSL is available!</b></h1>                   
+                        <p>We’re sorry Fiber Internet isn’t available in your area. Please submit your email address so we can let you know when Fiber does become available. Good news though, DSL is available. Contact us today to get connected <a href="tel:1-207-494-2000">207.GWI.2000</a>.</p>
+                        <div class="try_another">SEARCH AGAIN</div>
+                        <div class="fiber_contect">
+                          <?php echo do_shortcode('[contact-form-7 id="1120" title="Fiber Contact Form"]');?>
+                        </div>
+                    </div>  
+                    
+                </div>
+            </div>
+        </div>
+        <div class="about_text" style=" margin-top: 50px;">
+          <p>
+            *Our Speed Guarantee is only for GWI fiber customers who are using our Wireless Gateway Product.  Also, you must be using a modern device capable of handling such speeds.  Flip phones, bag phones, Win95, 56k modems or an Apple 1 won’t do the trick.
+          </p>
+        </div>
+      </div>
+    </div>
+</div>
+<?php get_footer() ; ?>
+
+<script type="text/javascript"> 
+window.onscroll = function() {myFunctiocn()};
+var sticky = jQuery("#pricebox").offset();
+var newtopbox = sticky.top;
+function myFunctiocn() {
+  if (jQuery(window).scrollTop() > newtopbox) {
+        jQuery('.price_boxtop').addClass('fixedtop');
+    } else {
+        jQuery('.price_boxtop').removeClass('fixedtop');
+    }
+}
+
+jQuery("#all_key_enter").submit(function(e) {
+    e.preventDefault();
+    var input = document.getElementById("searchaddress");
+    input.addEventListener("keyup", function(e) {
+      if (event.keyCode === 13) {
+       e.preventDefault();
+        CheckAddress();
+      }
+    });
+
+});
+jQuery('#searchaddress').keyup(function () {
+    if (jQuery.trim(jQuery('#searchaddress').val()).length) {
+        jQuery('.homebanner form input[type="button"]').removeClass('btndisable');
+    } else {
+        jQuery('.homebanner form input[type="button"]').addClass('btndisable');
+    }
+});
+function Createlead(Address,latitute,longitude){
+
+ var data = {
+        'action': 'action_createlead',
+        address: Address,
+        lat: latitute, 
+        long: longitude      
+    }
+    jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {
+      console.log('Createlead',response);
+    });
+
+}
+function CheckAddress(){
+  var address = jQuery("#searchaddress").val();
+  
+  if(address){
+    var data = {
+        'action': 'action_addresscheck',
+         address: address,
+                
+    }
+    jQuery('#loader').show();  
+     
+    jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {
+        console.log(response);
+        var res =jQuery.parseJSON(response);
+       // var address_latlong = res.status[0].geom.coordinates[0];
+        //Createlead(address,address_latlong[0][0],address_latlong[0][1]);
+       
+        if(res){
+           if(res.status[0] == true || res.status[0] == false || res.status[0] == null){
+              jQuery(".fibernot_available").show();
+             jQuery(".fiber_response").hide();    
+             jQuery('#loader').hide(); 
+             jQuery(".fibernot_lagecy").hide();  
+             jQuery(".stepfirst").hide(); 
+             jQuery('#pricebox').removeClass('price_boxtop'); 
+             jQuery('#pricebox').removeClass('fixedtop'); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                
+				var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+				var adddress_state = jQuery('.address_state').val(break_address[2]);
+                var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          }
+          else if(res.status[0] != null && res.status[0].name != null && (res.status[0].status == 'Residential' || res.status[0].status == 'Mixed')){           
+               jQuery(".fibernot_available").hide();
+               jQuery(".fiber_response").show();
+               jQuery('#loader').hide(); 
+               jQuery(".fibernot_lagecy").hide();  
+               jQuery('#pricebox').addClass('price_boxtop');
+                var address_latlong = res.status[0].geom.coordinates[0];
+                Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+	            var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          } 
+          else if (res.status[0].status == 'Legacy'){
+              jQuery(".fibernot_available").hide();
+              jQuery(".fiber_response").hide();    
+              jQuery(".fibernot_lagecy").show();
+              jQuery('#loader').hide();  
+              jQuery(".stepfirst").hide(); 
+              jQuery('#pricebox').removeClass('price_boxtop');
+              jQuery('#pricebox').removeClass('fixedtop'); 
+                var address_latlong = res.status[0].geom.coordinates[0];
+                Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+				var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          }
+            else
+          {    
+             jQuery(".fibernot_available").show();
+             jQuery(".fiber_response").hide();    
+             jQuery('#loader').hide(); 
+             jQuery(".fibernot_lagecy").hide(); 
+              jQuery(".stepfirst").hide(); 
+              jQuery('#pricebox').removeClass('price_boxtop');
+              jQuery('#pricebox').removeClass('fixedtop'); 
+                var address_latlong = res.status[0].geom.coordinates[0];
+                Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+	            var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          } 
+        } 
+   });  
+   }else{
+      jQuery('#loader').hide();  
+   } 
+}
+
+jQuery(window).load(function() {      
+    var address = jQuery("#searchaddress").val();    
+    if(address){
+      var data = {
+          'action': 'action_addresscheck',
+          address: address      
+      };
+
+      jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {
+       console.log(response);
+        var res =jQuery.parseJSON(response);
+      
+         if(res){
+          if(res.status[0] == true || res.status[0] == false || res.status[0] == null){
+             jQuery(".fibernot_available").show();
+             jQuery(".fiber_response").hide();    
+             jQuery('#loader').hide(); 
+             jQuery(".fibernot_lagecy").hide();  
+             jQuery(".stepfirst").hide(); 
+             jQuery('#pricebox').removeClass('price_boxtop'); 
+             jQuery('#pricebox').removeClass('fixedtop'); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+				var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          }
+          else if(res.status[0] != null && res.status[0].name != null && (res.status[0].status == 'Residential' || res.status[0].status == 'Mixed')){           
+               jQuery(".fibernot_available").hide();
+               jQuery(".fiber_response").show();
+               jQuery('#loader').hide();
+               jQuery(".fibernot_lagecy").hide();   
+               jQuery('#pricebox').addClass('price_boxtop');
+                var address_latlong = res.status[0].geom.coordinates[0];
+                Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+				var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          } 
+          else if (res.status[0].status == 'Legacy'){              
+              jQuery(".fibernot_available").hide();
+              jQuery(".fiber_response").hide();    
+              jQuery(".fibernot_lagecy").show();
+              jQuery('#loader').hide();
+              jQuery(".stepfirst").hide(); 
+              jQuery('#pricebox').removeClass('price_boxtop');
+              jQuery('#pricebox').removeClass('fixedtop');
+                var address_latlong = res.status[0].geom.coordinates[0];
+                Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+				var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          }
+            else
+          {    
+             jQuery(".fibernot_available").show();
+             jQuery(".fiber_response").hide();    
+             jQuery('#loader').hide();  
+             jQuery(".fibernot_lagecy").hide();  
+              jQuery(".stepfirst").hide(); 
+              jQuery('#pricebox').removeClass('price_boxtop');
+              jQuery('#pricebox').removeClass('fixedtop');  
+               var address_latlong = res.status[0].geom.coordinates[0];
+               Createlead(address,address_latlong[0][0],address_latlong[0][1]); 
+                jQuery('ul li').removeClass('onclicked');
+                jQuery('ul li').removeClass('onclick');
+                jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+                jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+                jQuery("#update_price").html('0');
+                var break_address = address.split(',');
+				console.log(break_address[0]);
+				console.log(break_address[1]);
+				console.log(break_address[2]);
+				console.log(break_address[3]);
+				var addressone = jQuery(".addressone").val(break_address[0]);
+				var addresstwo = jQuery(".addresstwo").val(break_address[0]);
+				var address_city = jQuery(".address_city").val(break_address[1]);
+	            var adddress_state = jQuery('.address_state').val(break_address[2]);
+				var address_zipcode = jQuery(".address_zipcode").val(break_address[3]);
+          } 
+        }
+      }); 
+    }else{
+      jQuery('#loader').hide();  
+    }
+});
+
+jQuery(window).load(function() { 
+  jQuery(".try_another").on("click", function(){
+      jQuery(".fibernot_available").hide();
+      jQuery(".fibernot_lagecy").hide();
+      jQuery(".fiber_response").hide();  
+      jQuery('#searchaddress').focus();
+      jQuery('#searchaddress').val('');
+      jQuery('.addressone').val('');
+      jQuery('.addresstwo').val('');
+      jQuery('.address_city').val('');
+      jQuery('.address_state').val('');
+      jQuery('.address_zipcode').val('');
+      jQuery(".stepfirst").show(); 
+      jQuery('#pricebox').removeClass('price_boxtop');
+      jQuery('#pricebox').removeClass('fixedtop');
+      jQuery('ul li').removeClass('onclicked');
+      jQuery('ul li').removeClass('onclick');
+      jQuery('ul.art-vmenu li input[type="radio"]').prop('checked', false);
+      jQuery('ul.art-vmenu1 li input[type="checkbox"]').prop('checked', false);
+      jQuery("#update_price").html('0');
+  });
+});
+
+jQuery(document).ready(function(){ 
+    jQuery("ul.art-vmenu").on("click","li", function(e){                 
+      var string_price1 = jQuery(this).find("span.price1").text();
+      jQuery('ul li.current').removeClass('onclicked');
+      jQuery(this).closest('li').addClass('onclicked');
+
+     var price1 = parseFloat(string_price1);    
+     var set_priceckeck = jQuery('input[name="takeplane"]:checked').val();
+     if (set_priceckeck != null){
+       var set_price1 = set_priceckeck;
+     }else{
+      var set_price1 = 0;
+     }
+
+     var check_price2 = jQuery('#hidden_price2:checked').val();
+     var check_price3 = jQuery('#hidden_price3:checked').val();
+
+     if (check_price2 != null && check_price3 != null ) {
+        var final_price = (parseFloat(set_price1) + parseFloat(check_price2) + parseFloat(check_price3)).toFixed(2);
+     }else if (check_price2 == null && check_price3 != null ) {
+      var final_price = (parseFloat(set_price1) + parseFloat(check_price3)).toFixed(2);
+     }else if (check_price2 != null && check_price3 == null ) {
+      var final_price = (parseFloat(set_price1) + parseFloat(check_price2)).toFixed(2);
+     }else{
+        var final_price =parseFloat(set_price1).toFixed(2);
+     }
+      var total  = final_price; 
+      jQuery("#update_price").html(total);
+    });      
+    jQuery("ul.art-vmenu1").on("click","li", function(e){
+    	jQuery(this).toggleClass('onclick');
+     var set_priceckecks = jQuery('input[name="takeplane"]:checked').val();
+     if (set_priceckecks != null){
+       var set_pricetop = set_priceckecks;
+     }else{
+      var set_pricetop = 0;
+     }
+     var check_price22 = jQuery('#hidden_price2:checked').val();
+     var check_price33 = jQuery('#hidden_price3:checked').val();
+
+     if (check_price22 != null && check_price33 != null ) {
+        var final_price2 = (parseFloat(set_pricetop) + parseFloat(check_price22) + parseFloat(check_price33)).toFixed(2);
+     }else if (check_price22 == null && check_price33 != null ) {
+      var final_price2 = (parseFloat(set_pricetop) + parseFloat(check_price33)).toFixed(2);
+     }else if (check_price22 != null && check_price33 == null ) {
+      var final_price2 = (parseFloat(set_pricetop) + parseFloat(check_price22)).toFixed(2);
+     }else{
+        var final_price2 = parseFloat(set_pricetop).toFixed(2);
+     }
+       var total  = final_price2;      
+      jQuery("#update_price").html(total);
+    });
+});
+</script>
+
+function.php
+
+<?php
+add_action('wp_head', 'show_template');
+function show_template() {
+   global $template;
+// print_r($template);
+}
+
+
+add_action( 'wp_enqueue_scripts', 'wpdocs_theme_name_scripts' );
+function wpdocs_theme_name_scripts() {
+    wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri() . '/css/bootstrap.min.css');
+    wp_enqueue_style( 'font-awesome', get_stylesheet_directory_uri() . '/font-awesome/css/font-awesome.min.css');  
+    wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.min.js', array(), '1.0.0', true );
+    wp_enqueue_style( 'bootstrap-select', get_stylesheet_directory_uri() . '/css/bootstrap-select.min.css'); 
+
+    wp_enqueue_script( 'bootstrap-select', get_stylesheet_directory_uri() . '/js/bootstrap-select.min.js', array(), '1.0', true );
+    wp_enqueue_script( 'popper', get_stylesheet_directory_uri() . '/js/popper.js', array(), '1.0.0', true ); 
+    wp_enqueue_script( 'typer', get_stylesheet_directory_uri() . '/js/typer.js', array(), '1.0.0', true ); 
+    wp_enqueue_script( 'typedjs', get_stylesheet_directory_uri() . '/js/typed.min.js', array(), rand(), true );
+    wp_enqueue_style( 'child-style',  get_stylesheet_directory_uri() . '/style.css',array(), rand(), '');
+}
+
+
+
+// create shortcode to News [banner-news]
+add_shortcode( 'banner-news', 'gwi_news_shortcode' );
+function gwi_news_shortcode( $atts ) {
+    ob_start();
+    $args = array('post_type' => 'post', 'posts_per_page' => 3);
+    $query = new WP_Query($args);
+    ?>
+    <div class="gwi_news">
+        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+            <?php if ( $query->have_posts() ) { $j=0; while ( $query->have_posts() ) { $query->the_post();  ?>
+                <div class="carousel-item <?php if($j=='0'){echo 'active';}?>">
+                    <h1><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h1>
+                    <p class="postauthor"><?php
+                        $author_id = get_post_field ('post_author', $cause_id);
+                        $display_name = get_the_author_meta( 'first_name' , $author_id ); 
+                        //$display_name = get_the_author_meta( 'display_name' , $author_id ); 
+                        echo $display_name;
+                    ?></p>
+                    <p class="posttime">Updated <b><?php the_date('M d, Y'); ?></b></p>
+                </div>
+            <?php $j++; } } ?>   
+            </div> 
+            <ul class="carousel-indicators">
+              <?php if ( $query->have_posts() ) { $i=0; while ( $query->have_posts() ) { $query->the_post();  ?>   
+                <li data-target="#myCarousel" data-slide-to="<?php echo $i;?>" class="<?php if($i=='0'){echo 'active';}?>"></li>
+              <?php $i++; } } ?>                      
+            </ul>
+            <?php
+                wp_reset_postdata(); 
+            ?>
+        </div>
+    </div>
+    <?php $myvariable = ob_get_clean();
+    return $myvariable;
+
+}
+// ajax for check address value to api
+        
+add_action( 'wp_ajax_action_addresscheck', 'CheckAddress_callback' );    // If called from admin panel
+add_action( 'wp_ajax_nopriv_action_addresscheck', 'CheckAddress_callback' );    // If called from front end 
+
+function CheckAddress_callback() {
+    $address = $_POST['address'];
+    $url   = 'https://vetro.io/api/demand/addressstatus/'.$address;
+    $res = array(
+        'headers'  => array(
+                'token' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiZGFuQGF1dHVtbmxhbmUuY28iLCJpZCI6MTEwOSwiaWF0IjoxNTU3NDA0OTg3fQ.hLR2L03QSgzcEfl44BsYu0IypRFe-DBQusn1oQhHF1M'
+            ),
+        'method' => 'GET'
+    );
+    $arg = wp_remote_request($url,$res);
+    $body = wp_remote_retrieve_body($arg);             
+   // echo  $body;
+    wp_send_json($body);
+    //print_r($body);
+    wp_die();         
+    exit();
+}
+
+
+add_action( 'wp_ajax_action_createlead', 'CreateLead_callback' );    // If called from admin panel
+add_action( 'wp_ajax_nopriv_action_createlead', 'CreateLead_callback' );    // If called from front end
+function CreateLead_callback() { 
+$url   = 'https://vetro.io/api/lead';
+$address = $_POST['address'];
+$break_address = explode(",",$address);
+$address_city  = $break_address[1];
+$adddress_state = $break_address[2];
+$address_zipcode = $break_address[3];
+$lat = $_POST['lat'];
+$long = $_POST['long'];
+$response = wp_remote_post( $url, array(
+    'method' => 'POST',
+    'timeout' => 45,
+    'redirection' => 5,
+    'httpversion' => '1.0',
+    'blocking' => true,
+    'headers'  => array(
+                'token' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiZGFuQGF1dHVtbmxhbmUuY28iLCJpZCI6MTEwOSwiaWF0IjoxNTU3NDA0OTg3fQ.hLR2L03QSgzcEfl44BsYu0IypRFe-DBQusn1oQhHF1M'
+    ),
+    'body' => array( 'streetAddress' => $address, 'latLng' => [$lat, $long ] ,'state' => $adddress_state,'city' => $address_city,'zip' => $address_zipcode),
+    'cookies' => array()
+    )
+);
+
+if ( is_wp_error( $response ) ) {
+   $error_message = $response->get_error_message();
+   echo "Something went wrong: $error_message";
+} else {
+  $body = wp_remote_retrieve_body($response);
+  wp_send_json($body);
+   
+}
+wp_die(); 
+exit();
+}
