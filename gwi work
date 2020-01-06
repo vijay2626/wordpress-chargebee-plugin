@@ -1,0 +1,1262 @@
+function.php
+
+<?php
+// Exit if accessed directly
+if ( !defined( 'ABSPATH' ) ) exit;
+
+// BEGIN ENQUEUE PARENT ACTION
+// AUTO GENERATED - Do not modify or remove comment markers above or below:
+
+function wpdocs_theme_name_scripts() {
+    wp_register_style('jquery-ui', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');  
+    
+    wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri() . '/css/bootstrap.min.css');
+    wp_enqueue_style( 'font-awesome', get_stylesheet_directory_uri() . '/font-awesome/css/font-awesome.min.css');  
+    wp_enqueue_style( 'bootstrap-select', get_stylesheet_directory_uri() . '/css/bootstrap-select.min.css'); 
+    wp_enqueue_style( 'owl-carousel', get_stylesheet_directory_uri() . '/css/owl.carousel.min.css');        
+  	wp_enqueue_style('jquery-ui');
+    wp_enqueue_style( 'child-style',  get_stylesheet_directory_uri() . '/style.css',array(), rand(), '');
+    wp_enqueue_script('bk_cdn_jquery', 'http://code.jquery.com/jquery-1.9.1.js', true ); 
+    
+    wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.min.js', array(), '1.0.0', true );
+    wp_enqueue_script( 'booking_reserved_js_moment', get_stylesheet_directory_uri() . '/js/moment.min.js', array(), '1.0.0', true );
+    wp_enqueue_script( 'booking_reserved_js_validate', get_stylesheet_directory_uri() . '/js/jquery.validate.min.js', array(), '1.0.0', true );
+    wp_enqueue_script('customjs', get_stylesheet_directory_uri().'/js/custom-js.js', array('jquery','jquery-ui-datepicker'), '1.0.0', 'true' );
+    // wp_enqueue_script( 'bootstrap-select', get_stylesheet_directory_uri() . '/js/bootstrap-select.min.js', array(), '1.0.0', true );  
+    // wp_enqueue_script( 'popper', get_stylesheet_directory_uri() . '/js/popper.js', array(), '1.0.0', true ); 
+    wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri() . '/js/owl.carousel.min.js', array(), '1.0.0', true ); 
+    
+}
+add_action( 'wp_enqueue_scripts', 'wpdocs_theme_name_scripts' );
+// END ENQUEUE PARENT ACTION
+
+
+/*create custom post type */
+add_action( 'init', 'create_posttype' );
+function create_posttype() {
+            // set up product labels
+            $labels = array(
+                'name' => 'Booking Reserved',
+                'singular_name' => 'Booking Reserved',
+                'add_new' => 'Add New Booking Reserved',
+                'add_new_item' => 'Add New Booking Reserved',
+                'edit_item' => 'Edit Booking Reserved',
+                'new_item' => 'New Booking Reserved',
+                'all_items' => 'All Booking Reserved',
+                'view_item' => 'View Booking Reserved',
+                'search_items' => 'Search Booking Reserved',
+                'not_found' =>  'No Booking Reserved Found',
+                'not_found_in_trash' => 'No Booking Reserved found in Trash', 
+                'parent_item_colon' => '',
+                'menu_name' => 'Booking Reserved',
+
+            );
+            
+            // register post type
+            $args = array(
+                'labels' => $labels,
+                'public' => true,
+                'has_archive' => true,
+                'show_ui' => true,
+                'capability_type' => 'post',
+                'hierarchical' => false,
+                'rewrite' => array('slug' => 'bookings-reserved'),
+                'query_var' => true,
+                'menu_icon' => 'dashicons-randomize',
+                'supports' => array(
+                    'title',
+                    'editor',
+                    'excerpt',
+                    'thumbnail'                  
+                ),
+                'taxonomies' => array('post_tag')
+            );
+            register_post_type( 'bookings-reserved', $args );
+
+}
+
+/* booking */
+add_action( 'wp_ajax_action_booking_phasemoon', 'Booking_callback' );    // If called from admin panel
+add_action( 'wp_ajax_nopriv_action_booking_phasemoon', 'Booking_callback' );    // If called from front end
+function Booking_callback(){
+$booking_user_name = $_POST['booking_user_name'];
+$booking_user_email = $_POST['booking_user_email'];
+$booking_user_contact = $_POST['booking_user_contact'];
+$booking_user_bookdate = $_POST['booking_user_bookdate'];
+$booking_user_showdate = $_POST['booking_user_showdate'];
+$result_string = "'" . str_replace(",", "','", $booking_user_bookdate) . "'";
+$break_date  =  explode(',', $booking_user_bookdate);
+$datesOnly = '';
+$monthOnly = '';
+$yearOnly = '';
+$Check_datesOnly = '';
+$Check_monthOnly = '';
+$Check_yearOnly  = '';
+$booking_user_month = $_POST['booking_user_month'];
+$booking_user_year = $_POST['booking_user_year'];
+$array_pass_date  = $_POST['array_pass_date'];
+$array_pass_month = $_POST['array_pass_month'];
+$array_pass_year = $_POST['array_pass_year'];
+$booking_user_package_name = $_POST['booking_user_package_name'];
+$booking_user_package_price = $_POST['booking_user_package_price'];
+$content = $booking_user_showdate;
+global $wpdb;
+foreach ($break_date as $Check_key => $Check_value) {
+$Check_dateArray  =  explode(' ', $Check_value);
+$Check_datesOnly = $Check_dateArray[0];
+$Check_monthOnly = $Check_dateArray[1];
+$Check_yearOnly = $Check_dateArray[2];
+$Check_datesOnly_join = implode(',', $Check_datesOnly);
+$Check_monthOnly_join = implode(',', $Check_monthOnly);
+$Check_yearOnly_join = implode(',', $Check_yearOnly);
+}
+$datum = $wpdb->get_results("select * FROM wp_bqclj9hmsk_booking_reserved WHERE wp_bqclj9hmsk_booking_reserved.common_date IN (".$result_string.") ");
+if($wpdb->num_rows > 0) {
+echo 'already';
+die;  
+}
+else{
+    $date_time = date('l jS \of F Y h:i:s');
+    $my_post = array(
+    'post_title' => $booking_user_name,
+    'post_name' => $booking_user_email,
+    'post_content' => $content ,
+    'post_status' => 'publish',
+    'post_type' => 'bookings-reserved',
+    );
+    $post_id = wp_insert_post($my_post);
+    update_post_meta($post_id, 'booking_user_contact', $booking_user_contact, true);
+    update_post_meta($post_id, 'booking_user_bookdate', $booking_user_bookdate, true);
+    update_post_meta($post_id, 'booking_user_month', $array_pass_month, true);
+    update_post_meta($post_id, 'booking_user_year', $array_pass_year, true);
+    update_post_meta($post_id, 'booking_user_package_name', $booking_user_package_name, true);
+    update_post_meta($post_id, 'booking_user_package_price', $booking_user_package_price, true);    
+    $table_name = $wpdb->prefix . 'booking_reserved';
+    foreach ($break_date as $key => $value) {
+    $dateArray  =  explode(' ', $value);
+    $datesOnly = $dateArray[0];
+    $monthOnly = $dateArray[1];
+    $yearOnly = $dateArray[2];   
+    $mixed  = $dateArray." ".$monthOnly." ".$yearOnly;  
+    $wpdb->query("INSERT INTO $table_name(post_id,post_title,post_content,post_type,post_status,booking_user_name,booking_user_email,booking_user_contact,booking_user_bookdate,booking_user_month,booking_user_year,booking_user_package_name,booking_user_package_price,booking_user_ondate,common_date) VALUES('".$post_id."','".$booking_user_name."','".$content."','bookings-reserved','publish','".$booking_user_name."','".$booking_user_email."','".$booking_user_contact."','".$datesOnly."','".$monthOnly."','".$yearOnly."','".$booking_user_package_name."','".$booking_user_package_price."','".$date_time."','".$value."')");   
+}
+$mail=0;
+if($post_id){
+            // send to admin record 
+            $to_admin      = 'developer@autumnlane.co'; 
+            $subject_admin = 'Request For Booking Reserved'; // Give the email a subject 
+            $headers_admin  = 'MIME-Version: 1.0' . "\r\n";
+            $headers_admin .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+            $headers_admin .= 'From: welcome@theautumnlane.com' . "\r\n" .
+            'Reply-To: welcome@theautumnlane.com' . "\r\n" .
+            'Reply-Path: welcome@theautumnlane.com' . "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+
+            $table_layout='<table width="300" height="125">
+            <tr>
+            <th width="182" scope="row"><div align="justify">Name : </div></th>
+            <td width="173">'.$booking_user_name.'</td>
+            </tr>
+            <tr>
+            <th scope="row"><div align="justify">Email :</div></th>
+            <td>'.$booking_user_email.'</td>
+            </tr>
+            <tr>
+            <th scope="row"><div align="justify"> Contact :</div></th>
+            <td>'.$booking_user_contact.'</td>    
+            </tr>
+            <tr>
+            <th scope="row"><div align="justify">Booking on Date : </div></th>
+            <td> Booking On Date '.$booking_user_showdate.'.</td>
+            </tr>    
+            </table>';
+            wp_mail($to_admin, $subject_admin, $table_layout, $headers_admin);
+
+            // mail send to customer 
+            $to      =  $booking_user_email; // Send email to our user
+            $subject = 'Booking Reserved '; // Give the email a subject 
+            $headers  = 'MIME-Version: 1.0' . "\r\n";
+            $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+            $headers .= 'From: welcome@theautumnlane.com' . "\r\n" .
+            'Reply-To: welcome@theautumnlane.com' . "\r\n" .
+            'Reply-Path: welcome@theautumnlane.com' . "\r\n" .
+            'X-Mailer: PHP/' . phpversion();            
+$txt = '<table align="center" bgcolor="#EAECED" border="0" cellpadding="0"
+cellspacing="0" width="100%">
+<tbody>
+<tr>
+<td align="center" valign="top">
+<div style=
+"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit">
+</div>
+<table width="600">
+<tbody>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align="center" valign="top">
+<table bgcolor="#FFFFFF" border="0"
+cellpadding="0" cellspacing="0" style=
+"overflow:hidden!important;border-radius:3px"
+width="580">
+<tbody>
+
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align="center">
+<table width="85%">
+<tbody>
+<tr>
+<td align=
+"center">
+<h2 style=
+"margin:0!important;font-family:"Open Sans",arial,sans-serif!important;font-size:28px!important;line-height:38px!important;font-weight:200!important;color:#252b33!important">
+Hey, '.$booking_user_name.'</h2>
+</td>
+</tr>
+<tr>
+<td align=
+"center" style=
+"font-family:"Open Sans",arial,sans-serif!important;font-size:28px!important;line-height:38px!important;font-weight:400!important;color:#252b33!important;font-style:italic!important">
+
+<br>
+Thanks you for requesting a reservation at The Barn at Autumn Lane! </td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align="center">
+<table border="0"
+cellpadding="0"
+cellspacing="0" width=
+"78%">
+<tbody>
+<tr>
+<td align=
+"center" style=
+"font-family:"Open Sans",arial,sans-serif!important;font-size:16px!important;line-height:30px!important;font-weight:400!important;color:#7e8890!important">
+
+Your Booking requested has been submitted for '.$booking_user_showdate.'</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+
+
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="580" style="text-align: center;">
+<tbody>
+<tr>
+<td>
+<div style="width:31%;display:inline-block;">
+<a href="https://www.facebook.com/autumnlanebarn/" style="color: #fff !important;line-height:50px;display:block;text-decoration:none!important;width:100%;background: #36549D;text-align: center;" target="_blank"><i class="fa fa-facebook"></i><span style="text-decoration:none">&nbsp;</span><span style="font-family:"Open Sans",arial,sans-serif!important;font-size:12px!important;color:#fff!important;text-transform:uppercase!important;border-radius:3px!important;text-decoration:none!important;font-weight:400!important">
+Like on Facebook</span></a>
+</div>
+
+<div style="width:31%;display: inline-block;">
+<a href="https://www.instagram.com/autumnlanebarn/?hl=en"
+style="color: #fff !important;line-height:50px;display:block;text-decoration:none!important;width:100%;background: #d30065;text-align: center;" target="_blank"><i class="fa fa-instagram"></i><span style="text-decoration:none">&nbsp;</span>
+<span style="font-family:"Open Sans",arial,sans-serif!important;font-size:12px!important;color:#fff!important;text-transform:uppercase!important;border-radius:3px!important;text-decoration:none!important;font-weight:400!important">
+Follow on Instagram</span></a>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0"
+cellspacing="0" width="580">
+<tbody>
+<tr>
+<td align="center" valign=
+"top">
+The Barn at Autumn Lane
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align="center" style=
+"font-family:"Open Sans",sans-serif!important;font-weight:400!important;color:#7e8890!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:.045em!important"
+valign="top">A unique space for a wedding ceremony and reception, the barn is newly constructed with an open floor plan and high ceilings, filling your occasion with natural light. The side of the barn opens to a courtyard area ideal for cocktail hour or games.</td>
+</tr>
+<tr style=
+"padding:0;margin:0;font-size:0;line-height:0">
+<td>&nbsp;</td>
+</tr>                                           
+
+<tr>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>';    
+wp_mail($to, $subject, $txt, $headers); 
+$mail=1;
+
+} 
+
+if($mail==1){
+    $status = 'sucess';
+}
+else{
+        $status = 'err';
+    }
+    echo $status;
+    die;   
+}
+
+}
+
+function get_table_prefix() {
+    global $wpdb;
+    $table_prefix = $wpdb->prefix . "outsider_plugin";
+    return $table_prefix;
+}
+
+ function sample_admin_notice__success($message){
+        $class = 'notice notice-success is-dismissible';
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $message);
+        }
+
+
+ function checkduplicateentry($month,$year,$select_date){
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'booking_reserved';
+        $result = $wpdb->get_row( "select Booking_ID,booking_user_bookdate,booking_user_month,booking_user_year FROM wp_bqclj9hmsk_booking_reserved WHERE   wp_bqclj9hmsk_booking_reserved.booking_user_year = '".$year."' AND wp_bqclj9hmsk_booking_reserved.booking_user_month = '".$month."' AND wp_bqclj9hmsk_booking_reserved.booking_user_bookdate = '".$select_date."' ", OBJECT);
+            foreach ($result as $details) {
+            echo $details->Booking_ID;
+            }
+
+        
+
+}
+
+
+add_filter( 'wp_mail_from_name', 'custom_wp_mail_from_name' );
+function custom_wp_mail_from_name( $original_email_from ) {
+    return 'Reservation Request';
+}
+
+global $wpdb, $wnm_db_version;
+$table_name = $wpdb->prefix.'booking_reserved';
+$charset_collate = $wpdb->get_charset_collate();
+if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+     $sql = "CREATE TABLE $table_name (
+        `Booking_ID` int(250) NOT NULL AUTO_INCREMENT,
+        `post_id` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `post_title` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `post_content` varchar(800) CHARACTER SET utf8 NOT NULL,
+        `post_type` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `post_status` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_name` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_email` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_contact` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_bookdate` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_month` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_year` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_package_name` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_package_price` varchar(250) CHARACTER SET utf8 NOT NULL,
+        `booking_user_ondate` varchar(250) CHARACTER SET utf8 NOT NULL, 
+        `common_date` varchar(500) CHARACTER SET utf8 NOT NULL,         
+        PRIMARY KEY (`Booking_ID`)
+        ) $charset_collate; ";
+     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+     dbDelta( $sql );
+     add_option("wnm_db_version", $wnm_db_version);
+}
+
+/* booking */
+    add_action( 'wp_ajax_action_Bookdate_reserved_check', 'Bookdate_reserved_check' );    // If called from admin panel
+    add_action( 'wp_ajax_nopriv_action_Bookdate_reserved_check', 'Bookdate_reserved_check' ); // If called from front end
+    function Bookdate_reserved_check(){     
+        global $wpdb;
+        $table_name = $wpdb->prefix . "booking_reserved";
+        $result = $wpdb->get_results("select booking_user_bookdate,booking_user_month,booking_user_year FROM wp_bqclj9hmsk_booking_reserved WHERE   wp_bqclj9hmsk_booking_reserved.booking_user_year = '".$_POST['year']."' ", OBJECT);
+        echo json_encode($result,true);
+        wp_die();       
+    }
+   
+   
+add_action('admin_enqueue_scripts', 'register_css_js');
+
+function register_css_js(){
+    wp_enqueue_style('booking_datatable_font_awesome' , 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+    wp_enqueue_style( 'booking_datatable15', 'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css' );
+    wp_enqueue_style( 'booking_datatable16', 'https://cdn.datatables.net/rowreorder/1.2.5/css/rowReorder.dataTables.min.css' );
+    wp_enqueue_style( 'booking_datatable17', 'https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css' );  
+    wp_enqueue_script( 'booking_datatable12', 'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js', true );
+    wp_enqueue_script( 'booking_datatable13', 'https://cdn.datatables.net/rowreorder/1.2.5/js/dataTables.rowReorder.min.js', true );
+    wp_enqueue_script( 'booking_datatable14', 'https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js', true );
+}
+
+
+add_action('admin_menu', 'booking_reserved_create_menu');
+
+function booking_reserved_create_menu(){
+
+    add_menu_page('Booking Reserved Listing', //page title
+    'Booking Reserved Listing', //menu title
+    'manage_options', //capabilities
+    'booking_reserved_listing', //menu slug
+    'booking_reserved_listing'); //function
+
+
+    //this is a submenu
+    add_submenu_page('booking_reserved_listing', //parent slug
+    'Booking Reserved Listing ', //page title
+    'Booking Reserved Listing', //menu title
+    'manage_options', //capability
+    'booking_reserved_listing', //menu slug
+    'booking_reserved_listing'); //function
+}
+
+
+function booking_reserved_listing(){
+    if(isset($_GET['del'])){
+        $delete_id = $_GET['del'];
+        $break_id = explode('_', $delete_id);
+        global $wpdb;
+        $table_name = $wpdb->prefix.'booking_reserved';
+        //$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = %s ", 13, 'gargle'));
+        $result = $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE Booking_ID = %d AND post_id = %d", $break_id[0],$break_id[1]));
+        if($result){
+            sample_admin_notice__success('Delete Successfully Record!!!');
+        }
+    }
+?>
+  <div id="wrapper">
+    <div class="main-content">
+    <div id="alert-success" class="alert alert-success" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+    <div id="alert-danger" class="alert alert-danger" style="width: 300px;margin-bottom: 10px;bottom: 5%;display: none;position: absolute;right: 0;z-index: 9;"></div>
+    <div class="row small-spacing">
+    <div class="col-md-12 col-xs-12">
+
+  <div style="margin-top: 5%;" class="wrap">
+    <h2 style="text-align: center;font-size: 20px;color:#fff;background-color: #FE7F5D;">Booking Reserved Listing</h2>
+    <br>
+    <br>
+    <table style="margin-top: 20% !important;" id="datatable_view" class="table table-striped table-bordered display" style="width:100%" >
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Contact</th>
+          
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'booking_reserved';
+        $result = $wpdb->get_results("SELECT DISTINCT post_id,post_title,post_content,booking_user_name,booking_user_email,booking_user_contact FROM $table_name");
+        
+        $count_record = 1;
+        foreach ($result as $print){?>
+            <tr>
+                <td style="text-align: center;"><?php echo $count_record;?></td>
+                <td style="text-align: center;"><?php echo $print->booking_user_name;?></td>
+                <td style="text-align: center;"><?php echo $print->booking_user_email;?></td>
+                <td style="text-align: center;"><?php echo $print->booking_user_contact;?></td>
+
+                <!-- <td style="text-align: center;"><?php //echo $print->post_content;?></td> -->              
+                <td>
+                <?php 
+                
+                $result_secondquery = $wpdb->get_results("SELECT Booking_ID,common_date FROM $table_name WHERE post_id = $print->post_id");
+                foreach ($result_secondquery as $print_second){?>
+                  <ul><li><?php echo $print_second->common_date;?> &nbsp;
+                   <a href="admin.php?page=booking_reserved_listing&del=<?php echo $print_second->Booking_ID;?>_<?php echo $print->post_id;?>"><i id="<?php echo $print_second->Booking_ID;?>_<?php echo $print->post_id;?>" class="fa fa-trash" aria-hidden="true"></i></a>
+                    </li></ul>
+                     <?php } ?>
+
+
+                </td>                 
+            </tr>
+            
+        <?php $count_record++; } ?>
+    
+      </tbody>  
+    </table>
+</div>
+</div>
+</div>
+</div>
+    <script type="text/javascript">
+      jQuery(document).ready(function($){
+        var table = $('#datatable_view').DataTable({
+                'destroy': true,
+                'paging': true,
+                'lengthChange': true,
+                'searching': true,
+                'ordering': true,
+                'info': true,
+                'autoWidth': true
+                });
+        });
+    </script>
+<?php }
+  
+
+templtae-reserved-page.php
+
+<?php
+
+// =============================================================================
+// TEMPLATE NAME: Reserve Page Template
+// -----------------------------------------------------------------------------
+// =============================================================================
+
+get_header();?>
+<style type="text/css">
+	.p1{
+		color:red;
+		font-size: 20px;
+		text-align: center;
+	}
+</style>
+<div class="x-main full">	
+		<input type="hidden" name="all_selected_date" id="all_selected_date" >
+		<input type="hidden" name="current_month" id="current_month">
+		<input type="hidden" name="current_year" id="current_year" >
+		<input type="hidden"  id="current_package_name">
+		<input type="hidden"  id="current_pack_price">
+		<input type="hidden" id="newmailfinalstring">
+		<input type="hidden" id="show_mail_bookdateformat">
+		<input type="hidden" id="array_pass_date">
+		<input type="hidden" id="array_pass_month">
+		<input type="hidden" id="array_pass_year">      
+		<?php the_content();?>
+		<div id="ex3"></div>
+</div>
+<?php get_footer();?>
+<script type="text/javascript">
+	var start_date_array ="";
+	var book_already_date="";
+	var book_already_month="";
+	var book_already_year="";    
+    var selected_date_array = new Array();
+	var new_selected_date_array = new Array();
+	var new_selected_separate_date_array = new Array();
+	var new_selected_month_array = new Array();
+	var new_selected_year_array = new Array(); 
+    var current_package_name;
+    var current_pack_price;
+    var display_finalArray = new Array();
+    var maildisplay_finalArray = new Array();
+    var getstring;
+    var cm;
+    var cy;
+    var lastvalue_Array = new Array();
+    var hold_package;
+    var hold_date_array = new Array();
+    var current_month = undefined;
+    var current_year = undefined;
+    var selectedDate;
+
+	    jQuery(function($){
+		  	 var set_price = $(".active .package_price").html();
+		  	 var set_package_name = $(".active .package_name").html();
+		  	 current_pack_price = document.getElementById('current_pack_price').value = set_price;
+		  	 current_package_name = document.getElementById('current_package_name').value = set_package_name;
+		});
+
+		document.addEventListener("DOMContentLoaded", function(){ 		
+           
+			current_month = new Date().getMonth() + 1;
+			current_year = new Date().getFullYear();
+			
+			if (localStorage.length > 0 ) {
+				localStorage.clear();
+			}	    
+						
+			var data = {
+				'action': 'action_Bookdate_reserved_check',
+				year: current_year        
+			};
+		    
+
+		    jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {		        	        
+		        var res = JSON.parse(response);
+		        //console.log('default',res);	      
+		        for (var i = 0; i < res.length; i++) {				
+					if(i>0){
+						book_already_date += ','; 
+						book_already_month += ','; 
+						book_already_year += ','; 
+					}			
+					book_already_date += res[i].booking_user_bookdate;
+					book_already_month += res[i].booking_user_month;
+					book_already_year += res[i].booking_user_year;
+		        }
+
+		        load_moon_phases(current_month, current_year, function(moon){
+		        	drawCalendar(moon);
+		        });
+			});
+		});
+
+		var tab_section = document.getElementById("tab_section");
+		var btns = tab_section.getElementsByClassName("tab_pack");
+	
+		for (var i = 0; i < btns.length; i++) {
+
+			btns[i].addEventListener("click", function(){
+				var current = document.getElementsByClassName("active");
+				current[0].className = current[0].className.replace(" active", "");
+				this.className += " active";
+				var set_price_2 =jQuery(".active .package_price").html();
+				var set_package_name_2 = jQuery(".active .package_name").html();
+				current_pack_price = document.getElementById('current_pack_price').value = set_price_2;
+				current_package_name = document.getElementById('current_package_name').value = set_package_name_2;
+
+					// jQuery('.barn_packages').on('click', function(){
+					// 	setInterval(function(){ 	            
+					//        	current_pack_price =  document.getElementById('current_pack_price').value = set_price_2;
+					// 		current_package_name =  document.getElementById('current_package_name').value = set_package_name_2;
+					//        }, 1000);
+					// });
+				});		
+		}
+
+	function load_moon_phases(month, year, callback){	
+
+		var configMoon = {
+			lang  		:'en', // 'ca' 'de' 'en' 'es' 'fr' 'it' 'pl' 'pt' 'ru' 'zh' (*)
+			month 		: month, // 1  - 12
+			year  		: year,
+			size		:50, //pixels
+			lightColor	:"#fe7f5d", //CSS color
+			shadeColor	:"#fff", //CSS color
+			sizeQuarter	:20, //pixels
+			texturize	:false //true - false
+		}
+
+		configMoon.LDZ = new Date(configMoon.year,configMoon.month-1,1)/1000;
+
+		var gets = [];
+
+		for (var i in configMoon){
+			gets.push(i+"="+encodeURIComponent(configMoon[i]))
+		}	
+
+		var xmlhttp = new XMLHttpRequest();
+		var url = "http://www.icalendar37.net/lunar/api/?"+gets.join("&");
+
+		xmlhttp.onreadystatechange = function() {
+
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+				var moon  = JSON.parse(xmlhttp.responseText);
+				callback(moon);
+			}
+		}
+
+		xmlhttp.open("GET", url, true);
+		xmlhttp.send();
+	};
+
+
+	function drawCalendar(moon){
+        
+		var sunday
+		var day
+		var firstDayMonth = parseInt(moon.firstDayMonth)		
+		var lastDayMonth = parseInt(moon.phase[moon.daysMonth].dayWeek)
+		var html="<div class='x-container max width'><table cellspacing=5 cellpadding=0 border=0 class='reserve_calendar'>"
+		html+=" <tr>";
+		html+=" <td class='tophead_year' colspan=8> <a id='cal_ctrl_left' onclick='refreshCalendar(0)'>";
+		html+=" <i class='fa fa-angle-left'></i></a> "+moon.nameMonth[moon.month-1]+" "+ moon.year;
+		html+=" <a id='cal_ctrl_right'  onclick='refreshCalendar(1)'>";
+		html+=" <i class='fa fa-angle-right'></i></a><span title='index=3 - Full moon' style='float: right;'><svg width='20' height='20' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' stroke-width='0' fill='#fe7f5d'></circle><path d='M50,2 A48,48 0 0,0 50,98' stroke-width='0' fill='#fe7f5d'></path></svg>  Full Moon </span></td><tr>"
+		html+="<tr>";
+
+		if(jQuery('#'+ moon.nameMonth[moon.month-1] +'_'+moon.year+'').length){
+		 jQuery('#newmailfinalstring').append('<br/>');
+
+		}else{
+		  jQuery('#newmailfinalstring').append('<input type="hidden"   id="'+ moon.nameMonth[moon.month-1] +"_"+moon.year+'">');
+
+		}
+		for (var  i=0;i<7;i++){	html+="<th class='head_days'><div class='daysname'>"+moon.nameDay[i]+"</div></th>" }	
+		html+="</tr><tr>"
+		html+=  new Array(firstDayMonth).join( "<td class='void'></td>" );
+		for (  i=0;i < moon.daysMonth;i++){
+			day=i+1
+        var splits_date = book_already_date.split(",");
+        var splits_month = book_already_month.split(",");
+        var splits_year = book_already_year.split(",");      
+        var currentDate;
+        var checkbox_id;
+        if(day > 9){
+        	currentDate = day+" "+moon.nameMonth[moon.month-1]+" "+moon.year;
+            checkbox_id = day+"_"+moon.nameMonth[moon.month-1]+"_"+moon.year;
+        }else{
+        	currentDate = "0" + day+" "+moon.nameMonth[moon.month-1]+" "+moon.year;
+        	checkbox_id = "0" + day+"_"+moon.nameMonth[moon.month-1]+"_"+moon.year;
+        }  
+        var index = new_selected_date_array.indexOf(currentDate);     
+		sunday=(moon.phase[day].dayWeek==6)?"class=''":""	
+			if ((i+firstDayMonth)%7==1 || (i+firstDayMonth)%7==2 || (i+firstDayMonth)%7==3) {	
+				html+="<td  class='disable_date'>"
+			}else{
+				if(index > -1){
+					html+="<td  class='enable_date select_date'>"
+				}
+				else {
+					html+="<td  class='enable_date'>"
+				}				
+			}
+			indexFaseLimit = moon.phase[day].isPhaseLimit
+			if (indexFaseLimit){
+				html+= "<span title='index="+indexFaseLimit+ " - "+moon.phase[day].phaseName+"' >" + moon.phase[day].svgMini + "</span>"
+			}
+
+			if ((i+firstDayMonth)%7==1 || (i+firstDayMonth)%7==2 || (i+firstDayMonth)%7==3) {
+				html+="<div class=''><p>"+day+"</p></div></td>"
+			}else{
+			    
+			    if(index > -1){
+			    	html+="<div class='selectable' onclick='selectday("+day+",\""+moon.nameMonth[moon.month-1]+"\","+moon.year+",this)'> <input id='"+day+"_"+moon.nameMonth[moon.month-1]+"_"+moon.year+"'  type='checkbox' class='checkbox_onclick' name='set_caldate[]' value='"+day+"' checked /><b></b>"+day+"</div></td>"
+			    }
+			    else {
+			    	html+="<div class='selectable' onclick='selectday("+day+",\""+moon.nameMonth[moon.month-1]+"\","+moon.year+",this)'><input id='"+checkbox_id+"' type='checkbox'  class='checkbox_onclick' name='set_caldate[]' value='"+day+"'><b></b>"+day+"</div</td>"
+			    }
+			}
+			
+			if ((i+firstDayMonth)%7==0) html+="</tr><tr>"
+		}
+		html+=  new Array(7 - lastDayMonth).join( "<td class='void blankvoid'></td>" );	
+		html+="</tr></table></div>"
+		html+="<div class='calender_btm'><div class='x-container max width'><span id='previous_hold_value_finalString'></span><span id='all_selected_date_value'></span><span class='' id='set_current_cm'></span><span id='set_current_cy' class=''></span><span id='set_current_package_name' class=''></span><span id='set_current_package_price' class=''></span><span id='format_look'></span><button type='button' class='btn bgbtn' data-toggle='modal' data-target='#addEntry' id='addModalBtn'>Send Reservation Request</button></div></div>"
+	   html+='<div class="modal fade reserve_calendarform" tabindex="-1" role="dialog" id="addEntry"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">	Booking </h4></div><form class="form-horizontal"  id="createForm"><div class="modal-body"><div class="messages"></div><div class="form-group"><label for="name" class="col-sm-12 control-label">Name</label><div class="col-sm-12"><input type="text" class="form-control" id="booking_username" name="booking_username" required="required"></div><span id="span_booking_user_name"></span></div><div class="form-group"><label for="email" class="col-sm-2 control-label">Email</label><div class="col-sm-12"><input type="email" class="form-control" id="booking_useremail" name="booking_useremail" required="required"></div><span id="span_booking_user_email"></span></div><div class="form-group"> <label for="contact" class="col-sm-12 control-label">Contact</label><div class="col-sm-12"><input type="text" class="form-control" id="booking_usercontact" name="booking_usercontact" onkeypress="return restrictAlphabets(event)" required="required"></div></div><span id="span_booking_user_contact"></span></div><div class="modal-footer addModalBtn"><button type="button" class="btn btn-primary submitBtn" onclick="SaveBooking()">Save changes</button></div></form> </div></div></div>'
+		document.getElementById("ex3").innerHTML=html;
+		for (  i=0;i < moon.daysMonth;i++){
+			day=i+1
+			 for (var j = 0 ; j < splits_date.length ; j++) {
+	        	if(day == splits_date[j]){
+	        		if(splits_month[j] == moon.nameMonth[moon.month-1] && splits_year[j] == moon.year){
+	        			document.getElementById(splits_date[j]+'_'+moon.nameMonth[moon.month-1]+'_'+splits_year[j]).disabled = true;
+	        		}
+	        	}
+	        }
+	    }
+
+	    if(localStorage.getItem(getMonthNameByMonthNumber(parseInt(current_month-1))+"_"+current_year)){
+		getstring = localStorage.getItem(getMonthNameByMonthNumber(parseInt(current_month-1))+"_"+current_year);
+		var show_innerhtml = document.getElementById(getMonthNameByMonthNumber(parseInt(current_month-1))+"_"+current_year).value;
+		setTimeout(function(){ 
+			document.getElementById('previous_hold_value_finalString').innerHTML = show_innerhtml;
+			}, 500);
+        }
+
+	}
+
+	function refreshCalendar(operation){
+		
+    	if(operation == 0){
+
+    		if(current_month == 1){
+    			current_month = 12;
+    			current_year--; 
+    		}else{
+    			current_month--;
+    		}
+    	}
+
+    	if(operation == 1){
+
+    		if(current_month == 12){
+    			current_month = 1;
+    			current_year++; 
+    		}else{
+    			current_month++;
+    		}
+    	}
+        
+        var data = {
+				'action': 'action_Bookdate_reserved_check',
+				//month: getMonthNameByMonthNumber(current_month-1),
+				year: current_year        
+			};
+		    
+
+		    jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {
+		        	        
+		        var res = JSON.parse(response);
+		        //console.log('onclick',res);	      
+		        for (var i = 0; i < res.length; i++) {				
+					if(i>0){
+						book_already_date += ','; 
+						book_already_month += ','; 
+						book_already_year += ','; 
+					}			
+					book_already_date += res[i].booking_user_bookdate;
+					book_already_month += res[i].booking_user_month;
+					book_already_year += res[i].booking_user_year;
+		        }
+
+		        load_moon_phases(current_month, current_year, function(moon){
+		        	drawCalendar(moon);
+		        });
+			});
+
+
+    	// load_moon_phases(current_month, current_year, function(moon){
+	    // 	console.log('current_month',current_month);
+	    // 	console.log('current_year',current_year);
+            
+     //    	drawCalendar(moon);
+
+	    // });
+    }
+    
+
+
+	function selectday(day, month, year, dateBox){ 
+		var selectedStatus = jQuery(dateBox).find('.checkbox_onclick')[0].checked;
+		 //var selectedDate = new Date(year+"-"+month+"-"+day);
+
+        // var selectedDate = new Date(day+"-"+month+"-"+year);
+
+        if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) 
+    {
+        selectedDate = new Date(day+"-"+month+"-"+year);
+    }
+     if(navigator.userAgent.indexOf("Chrome") != -1 )
+    {
+        selectedDate = new Date(day+"-"+month+"-"+year);
+    }
+     if(navigator.userAgent.indexOf("Safari") != -1)
+    {
+       selectedDate = new Date(day+"-"+month+"-"+year);
+    }
+     if(navigator.userAgent.indexOf("Firefox") != -1 ) 
+    {
+         selectedDate = new Date(day+"-"+month+" "+year);
+    }
+	
+		if(selectedStatus){
+			selected_date_array.push(selectedDate);
+		}
+		else{
+			selected_date_array = jQuery.grep(selected_date_array, function(i){
+				return dateDiffInDays(i,selectedDate) != 0;
+			});
+		}
+		selected_date_array.sort(function(a,b){
+			return a-b;
+		});
+		var display_date_array = [];
+		var startDate = selected_date_array[0];
+		var nextDate =  undefined;
+		var isDatePending = false;
+		for(var i = 0 ; i < selected_date_array.length ; i++){
+			isDatePending = true;
+			if(i > 0){				
+				nextDate = selected_date_array[i];
+				if(dateDiffInDays(selected_date_array[i-1], nextDate) > 1)
+				{
+					var displayDates = undefined;
+					if(nextDate && dateDiffInDays(startDate,selected_date_array[i-1]) == 0){
+						displayDates = startDate.getDate() + " " + getMonthNameByMonthNumber(startDate.getMonth());
+					}
+					else{
+						displayDates = startDate.getDate() + "-" + selected_date_array[i-1].getDate() + " " + getMonthNameByMonthNumber(selected_date_array[i-1].getMonth());
+					}
+					display_date_array.push(displayDates);
+					startDate = nextDate;
+				}
+			}
+		}
+
+		if(isDatePending){
+			var displayDates = startDate.getDate() + " " + getMonthNameByMonthNumber(startDate.getMonth());
+			if(nextDate && dateDiffInDays(startDate,nextDate) > 0){
+				displayDates = startDate.getDate() + "-" + nextDate.getDate() + " " + getMonthNameByMonthNumber(nextDate.getMonth());	
+			}
+			display_date_array.push(displayDates);
+		}
+
+		var all_display_date_array_join = display_date_array.join(',');
+
+		new_selected_date_array = selected_date_array.map(function(date){
+			let newDate = moment(date).format('DD MMMM YYYY');
+			return newDate;
+		});
+        
+        new_selected_separate_date_array = selected_date_array.map(function(date){
+			let newDate = moment(date).format('DD');		
+			return newDate;
+		});
+		new_selected_month_array = selected_date_array.map(function(date){
+			let newDateMonth = moment(date).format('MMMM');
+			return newDateMonth;
+		});
+		new_selected_year_array = selected_date_array.map(function(date){
+			let newDateYear = moment(date).format('YYYY');
+			return newDateYear;
+		});	
+		var all_date_join = new_selected_date_array.join(',');
+        var sep_date = removeDups(new_selected_separate_date_array);
+		var aa = removeDups(new_selected_month_array);
+		var bb = removeDups(new_selected_year_array);
+		var cc = aa.join(',');
+		var dd = bb.join(',');
+		var ee = sep_date.join(',');
+		document.getElementById('array_pass_month').value = cc;
+		document.getElementById('array_pass_year').value = dd;
+		document.getElementById('array_pass_date').value = ee;
+		var splits_displaydate = all_display_date_array_join.split(",");		
+		var newArrayOfDate = splits_displaydate.map(function(dateString){
+		var newString = dateString.split(" ");		
+			if(newString[1] == month){
+				return newString[0];	
+			}
+		});
+		newArrayOfDate = newArrayOfDate.filter(function( element ) {
+		   return element !== undefined;
+		});
+        if (typeof(Storage) !== "undefined") {
+            if(month){
+            var join_arr;
+            var finalString = month +" ["+ newArrayOfDate + "], "+year+" -- "+current_package_name+" - "+current_pack_price;           
+        	localStorage.setItem(month+"_"+year , finalString);
+        	if(newArrayOfDate.length == 0) {
+              document.getElementById('all_selected_date_value').innerHTML = '';
+            }
+            else{
+              document.getElementById('all_selected_date_value').innerHTML = localStorage.getItem(month+"_"+year);
+            }
+            
+            var first_month = jQuery("#all_selected_date_value").html();         
+            document.getElementById(month+"_"+year).value = first_month;
+            document.getElementById('previous_hold_value_finalString').innerHTML = " ";
+            display_finalArray.push(document.getElementById(month+"_"+year).value);              
+			for (const [key, value] of Object.entries(display_finalArray)) {
+			var splits_maildate = value.split(" ");			
+			var index_0 =  splits_maildate[0];
+			var index_2 =  splits_maildate[2];			
+			var final_index = index_0.concat(index_2);
+			var again_value = maildisplay_finalArray[final_index] = value;			  
+            }            
+            var newValueArr = [];
+			for (const [key_2, value_2] of Object.entries(maildisplay_finalArray)) {			
+			newValueArr.push(value_2);			
+			}            
+			var newPakage;
+            newValueArr = newValueArr.map(function(e){
+            	var newVar = e.split("--");            
+            	newPakage = newVar[1];
+            	return newVar[0];
+            })
+            var newTeststring = newValueArr.join('- ');
+            var newFinalString = newTeststring + " - " + newPakage;
+            document.getElementById('show_mail_bookdateformat').value = newFinalString;        			
+            }        	
+        }				
+		document.getElementById('all_selected_date').value = all_date_join;
+	} 
+    
+	function listAllItems(){  
+		for (i=0; i<=localStorage.length-1; i++)  
+		{  
+		key = localStorage.key(i);  
+		return localStorage.getItem(key);
+		}  
+	}
+
+	function dateDiffInDays(d1,d2){
+	    diff  = new Date(d2 - d1),
+	    days  = diff/1000/60/60/24;
+	    return days;
+	}
+    
+	function removeDups(names) {
+		let unique = {};
+		names.forEach(function(i) {
+		if(!unique[i]) {
+		unique[i] = true;
+		}
+		});
+		return Object.keys(unique);
+	}
+	
+	function SaveBooking() {      
+	    var booking_user_name        = jQuery("#booking_username").val(); 
+	    var booking_user_email       = jQuery("#booking_useremail").val();   
+	    var booking_user_contact     = jQuery("#booking_usercontact").val();
+	    var all_selected_date        = jQuery("#all_selected_date").val();
+	    var show_mail_bookdateformat  = jQuery("#show_mail_bookdateformat").val();
+	    var set_current_cm           = jQuery("#set_current_cm").val(); 
+	    var set_current_cy           = jQuery("#current_year").val(); 
+	    var array_pass_date          = jQuery("#array_pass_date").val(); 
+	    var array_pass_month         = jQuery("#array_pass_month").val(); 
+	    var array_pass_year         = jQuery("#array_pass_year").val(); 
+	    var set_current_package_name = jQuery("#current_package_name").val();
+	    var set_current_package_price= jQuery("#current_pack_price").val(); 	
+        if(booking_user_name == "" || booking_user_name == null) {
+			jQuery("#span_booking_user_name").text('This Name Field is Required!');	
+			return false;						 
+		}
+		else{
+			jQuery("#span_booking_user_name").text('');	
+		} 
+		var at_position = booking_user_email.indexOf("@");
+		var dot_position = booking_user_email.lastIndexOf(".");
+		if (at_position<1 || dot_position<at_position+2 || dot_position+2>=booking_user_email.length) {
+		jQuery("#span_booking_user_email").text("Given email address is not valid.");
+		return false;
+        }
+		else{
+			jQuery("#span_booking_user_email").text('');	
+		} 
+		if(booking_user_contact == "") {
+			jQuery("#span_booking_user_contact").text('This Contact Field is Required!');
+			return false;
+		}
+		else{
+			jQuery("#span_booking_user_contact").text('');	
+		}         
+	    var data = {
+	        'action': 'action_booking_phasemoon',
+	        booking_user_name: booking_user_name,
+	        booking_user_email: booking_user_email,
+	        booking_user_contact: booking_user_contact,
+	        booking_user_bookdate: all_selected_date,
+	        booking_user_showdate: show_mail_bookdateformat,
+	        booking_user_month: set_current_cm,
+	        booking_user_year: set_current_cy,
+	        array_pass_date: array_pass_date,
+	        array_pass_month: array_pass_month,
+	        array_pass_year: array_pass_year,
+	        booking_user_package_name: set_current_package_name,
+	        booking_user_package_price: set_current_package_price
+	    };       
+        if(booking_user_name && booking_user_email && booking_user_contact){
+	    jQuery.post('<?php echo admin_url('admin-ajax.php');?>' , data, function(response) {        
+	    if(response == 'sucess'){
+            jQuery('.messages').html('<span style="font-size:18px;color:#fe7f5d;">Thanks for contacting us, we\'ll get back to you soon.</p>');
+            jQuery("#createForm")[0].reset();
+            location.reload();
+			if (localStorage.length > 0 ) {
+			localStorage.clear();
+			setTimeout(function(){ 
+			jQuery("#createForm")[0].reset();
+            location.reload();
+			}, 1000);
+
+			}
+	    }
+	    else if(response == 'already'){
+            jQuery('.messages').html('<span style="font-size:18px;color:red;">Already Booking Is Reserved on This Date !!!</p>');
+           if (localStorage.length > 0 ) {
+			localStorage.clear();
+			setTimeout(function(){ 
+			jQuery("#createForm")[0].reset();
+            location.reload();
+			}, 5000);
+			}
+	    }  
+	    else{
+	        jQuery('.messages').html('<span style="font-size:18px;color:red;">Some problem occurred, please try again.</span>');
+	        }
+            jQuery('.submitBtn').removeAttr("disabled");
+            jQuery('.modal-body').css('opacity', '');
+	        }); 	  
+            }
+    }
+	       
+	function changeDECMonth(month,year,nameMonth){
+	
+		// console.log('nameMonth',nameMonth);       
+  //       if(localStorage.getItem(getMonthNameByMonthNumber(parseInt(month-1)))){
+		// getstring = localStorage.getItem(getMonthNameByMonthNumber(parseInt(month-1)));
+		// console.log('changeDECMonth',getstring);
+		// console.log(display_finalArray);
+		// var show_innerhtml = document.getElementById(getMonthNameByMonthNumber(parseInt(month-1))).value;
+		// setTimeout(function(){ 
+		// document.getElementById('previous_hold_value_finalString').innerHTML = show_innerhtml;
+		// }, 1000);
+  //       }
+
+		// var current_month = month;
+  //       var current_year = year;
+		// if(parseInt(current_month) < 1){		
+		// 	current_month = 12;
+		// 	current_year = parseInt(current_year) - 1;
+		// }
+		// var configMoon = {
+		// 	lang  		:'en', // 'ca' 'de' 'en' 'es' 'fr' 'it' 'pl' 'pt' 'ru' 'zh' (*)
+		//     month 		:current_month, // 1  - 12
+		// 	year  		:current_year,
+		// 	size		:50, //pixels
+		// 	lightColor	:"#fe7f5d", //CSS color
+		// 	shadeColor	:"#fff", //CSS color
+		// 	sizeQuarter	:20, //pixels
+		// 	texturize	:false //true - false
+		// }
+		// configMoon.LDZ = new Date(configMoon.year,configMoon.month,1)/1000;
+	   
+	}
+
+	function changeINCMonth(month, year , nameMonth){      
+            
+	
+		//console.log('nameMonth',nameMonth);
+
+		/*var current_month = month;
+        var current_year = year;
+		if(parseInt(current_month) > 12){		
+			current_month = 1;
+			current_year = parseInt(current_year) + 1;
+		}
+
+		 if(localStorage.getItem(getMonthNameByMonthNumber(parseInt(month-1)))){
+        	getstring = localStorage.getItem(getMonthNameByMonthNumber(parseInt(month-1)));
+        	
+        	var show_innerhtml = document.getElementById(getMonthNameByMonthNumber(parseInt(month-1))).value;
+            setTimeout(function(){              
+            	document.getElementById('previous_hold_value_finalString').innerHTML = show_innerhtml;
+        	}, 1000);
+        }        
+        
+
+		var configMoon = {
+		lang  		:'en', // 'ca' 'de' 'en' 'es' 'fr' 'it' 'pl' 'pt' 'ru' 'zh' (*)
+		month 		:current_month, // 1  - 12
+		year  		:current_year,
+		size		:50, //pixels
+		lightColor	:"#fe7f5d", //CSS color
+		shadeColor	:"#fff", //CSS color
+		sizeQuarter	:20, //pixels
+		texturize	:false //true - false
+		}
+		configMoon.LDZ=new Date(configMoon.year,configMoon.month,1)/1000
+		load_moon_phases(configMoon)
+		var getDaysInMonth = function(month,year) {
+		return new Date(year, month, 0).getDate();
+		};
+	    var daysOfMonth = getDaysInMonth(configMoon.month+1,configMoon.year);
+        var monthName = getMonthNameByMonthNumber(configMoon.month+1);
+	    var splits_date = book_already_date.split(",");
+        var splits_month = book_already_month.split(",");
+        var splits_year = book_already_year.split(",");
+	    for (  i=0;i < daysOfMonth;i++){
+			day=i+1
+			 for (var j = 0 ; j < splits_date.length ; j++) {
+	        	if(day == splits_date[j]){
+	        		if(splits_month[j] == monthName){
+	        			document.getElementById(splits_date[j]+'_'+monthName+'_'+splits_year[j]).disabled = true ;
+	        		}
+	        	}
+	        }
+	    }	   */
+
+	    // load_moon_phases(month, year, function(moon){
+	    // 	console.log('callback called 2');
+     //    	drawCalendar(moon);
+	    // });
+	}
+
+    function getMonthNameByMonthNumber(mm) { 
+	   var months = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"); 
+	   return months[mm]; 
+	}
+    
+    function restrictAlphabets(e){
+		var x=e.which||e.keycode;
+		if((x>=48 && x<=57) || x==8 ||
+			(x>=35 && x<=40)|| x==46)
+			return true;
+		else
+			return false;
+	}
+    
+	function validateEmail(email) {
+		var re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+		return re.test(email);
+	}
+
+	// function navigator_brower() { 
+ //     if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) 
+ //    {
+ //        selectedDate = new Date(day+"-"+month+"-"+year);
+ //    }
+ //     if(navigator.userAgent.indexOf("Chrome") != -1 )
+ //    {
+ //        selectedDate = new Date(day+"-"+month+"-"+year);
+ //    }
+ //     if(navigator.userAgent.indexOf("Safari") != -1)
+ //    {
+ //       selectedDate = new Date(day+"-"+month+"-"+year);
+ //    }
+ //     if(navigator.userAgent.indexOf("Firefox") != -1 ) 
+ //    {
+ //         selectedDate = new Date(month+"-"+day+"-"+year);
+ //    }
+   
+ //    }
+
+	jQuery(document).ready(function($){
+		setInterval(function(){ 
+	    $('.reserve_calendar td.enable_date input.checkbox_onclick').click(function(){
+	        if($(this).prop("checked") == true){
+	            //alert("Checkbox is checked.");
+	            $(this).parent().parent().addClass('select_date');
+	        }
+	        else if($(this).prop("checked") == false){
+	            //alert("Checkbox is unchecked.");
+	            $(this).parent().parent().removeClass('select_date');
+	        }
+	    });
+	}, 1000);
+
+	$('.x-anchor-toggle').on('click', function(){
+	$('.x-off-canvas.x-off-canvas-right').addClass('x-active');
+	});
+	$('.x-off-canvas-close-right').on('click', function(){
+	$('.x-off-canvas.x-off-canvas-right').removeClass('x-active');
+	});
+
+	});
+
+</script></script>
