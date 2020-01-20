@@ -57,3 +57,380 @@ $count_link_repeater++;
 ?>
 --- --
 <?php $footer_logo = get_field('footer_logo', 'option'); ?>
+
+
+------
+
+all get post from web project category ..
+
+$args = array(
+            'post_type' => 'tv_portfolio',
+            'posts_per_page' => -1,
+            'tax_query' => array(
+                array(
+                  'taxonomy' => 'tvportfolio_cat',
+                  'field' => 'slug',
+                  'terms' => 'web-projects'
+                )
+              )
+            );
+------------------------------------------------------------------------------------------------------------            
+                                     get specific search post from specific category all post
+ $args = array(
+            's' => $mobile_portfolio,
+            'post_type' => 'tv_portfolio',
+            'posts_per_page' => -1,
+            'tax_query' => array(
+                array(
+                  'taxonomy' => 'tvportfolio_cat',
+                  'field' => 'slug',
+                  'terms' => 'mobile-projects'
+                )
+              )
+            );  
+         
+  -------------------------------------------------------------------------------------------------------------------       
+                                                Media upload file using wordpress 
+  
+  <form id="thumbnail_upload" method="post" action="" enctype="multipart/form-data" >
+  <input type="file" name="thumbnail" id="thumbnail">
+  <input type="hidden" name="action" value="UploadImage_Action">
+  <input type="hidden" name="post_id" id="post_id" value="55" />
+  <?php wp_nonce_field( 'thumbnail', 'my_image_upload_nonce' ); ?> 
+  <button  class="btn btn-primary " id="thumbnail_upload" name="submit"> UPload  </button>
+<form>
+<br><br>
+
+
+
+
+<?php get_footer();?>
+<script type="text/javascript">
+
+ jQuery('#thumbnail_upload').on('submit',function(e){
+       e.preventDefault();
+
+      var fd = new FormData();
+      var file = jQuery(document).find('input[type="file"]');
+      var caption = jQuery(this).find('input[name=thumbnail]');
+      var individual_file = file[0].files[0];
+      fd.append("file", individual_file); 
+      fd.append('action', 'uploadimage_action');  
+
+      jQuery.ajax({
+          type: 'POST',
+          url: "<?php echo admin_url( 'admin-ajax.php' ); ?>",
+          data: fd,
+          contentType: false,
+          processData: false,
+          success: function(response){
+
+              alert(response);
+          }
+      });
+
+  });
+
+</script>
+
+ffunction.php
+
+/******FILE UPLOAD*****************/
+
+add_action( 'wp_ajax_uploadimage_action', 'image_upload_insert' );
+add_action( 'wp_ajax_nopriv_uploadimage_action', 'image_upload_insert' );
+
+
+function image_upload_insert(){
+
+    if($_FILES['file']['name']) {
+	  if(!$_FILES['file']['error']) {	    //validate the file
+	    $new_file_name = strtolower($_FILES['file']['tmp_name']);	    
+	      require_once( ABSPATH . 'wp-admin/includes/image.php' );
+	      require_once( ABSPATH . 'wp-admin/includes/file.php' );
+	      require_once( ABSPATH . 'wp-admin/includes/media.php' );
+	      $file_id = media_handle_upload( 'file', 0 );
+	 
+	      if ( is_wp_error( $file_id ) ) {
+	         wp_die('Error loading file!');
+	      } else {
+	        wp_die('Your menu was successfully imported.');
+	      }
+	    
+	  }
+	  else {
+	    
+	    wp_die('Error: '.$_FILES['file']['error']);
+	  }
+	} 
+
+}
+-------------------------------------------------------------------------------------------------
+                                                 Custom menu Wordpress 
+
+1. style.css   remove same 26 theme
+
+2. bloginfo('template_url') = 
+
+same use in custom 
+<link rel="stylesheet" type="text/css" href="<?php echo get_stylesheet_directory_uri(); ?>/css/style.css" />
+
+3. add script css and js 
+
+In css 
+
+wp_enqueue_style( 'planmember-style', get_template_directory_uri() . '/css/style.css',false,'1.1','all');
+
+In js 
+
+wp_enqueue_script( 'planmember-custom', get_template_directory_uri() . '/js/js/custom.js', array(), '20151215', true )
+
+ meaning of true and false  =  true means add script in footer and false means add script in header....
+
+how to separate header and footer 
+1. make folder partials
+   top-header.php  
+and call to any page with this command
+ <?php get_template_part( 'partials/top', 'header' ); ?>
+
+how to menu dynamic type of two method 
+
+1. <nav class="header__secondary js-secondaryNav main-color-bg">
+  <div class="container">
+      <div class="row">
+      <?php
+        $args1 = array(
+            'menu' => 'desktop-navbar-menu',
+            'container' => 'div',
+            'container_class' => 'col xs-12 lg-12 text-right',
+            'menu_class' => 'header__secondaryMenu'
+          );
+          wp_nav_menu($args1);
+        ?> 
+      </div>
+    </div>
+</nav>
+
+2.  <?php
+  $args1 = array(
+      'menu' => 'desktop-navbar-menu',
+      'container' => 'nav',
+      'container_class' => 'header__secondary js-secondaryNav main-color-bg',
+      'items_wrap'      => '<div class="container"><div class="row"><div class="col xs-12 lg-12 text-right"><ul class="header__secondaryMenu">%3$s</ul></div></div></div>',
+    );
+    wp_nav_menu($args1);
+?>
+
+3. menu dynamic with dropdown menu 
+
+<div class="header__menuWrapper">
+        <?php
+        $args2 = array(
+            'menu' => 'menu-list1',
+            'container' => 'div',
+            'container_class' => 'header__menuWrapper',
+            'items_wrap' => '%3$s',
+            'walker'  => new Walker_Quickstart_Menu(),
+      
+        );
+        wp_nav_menu($args2);
+      ?>
+    </div>
+
+/* script  for menu  add dynamic */
+class Walker_Quickstart_Menu extends Walker_Nav_Menu  {
+
+    /**
+     * At the start of each element, output a <li> and <a> tag structure.
+     * 
+     * Note: Menu objects include url and title properties, so we will use those.
+     */
+    function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+    	if( $depth == 0 ){
+	        $output .= sprintf( "\n<a class='header__tab js-headerTab js-headerDropdownTab' href='%s'%s>%s</a>\n",
+	            $item->url,
+	            ( $item->object_id === get_the_ID() ) ? ' class="current"' : '',
+	            $item->title
+	        );
+    	}else {
+    		$output .= sprintf( "\n<li><a href='%s'%s>%s </a></li>\n",
+	            $item->url,
+	            ( $item->object_id === get_the_ID() ) ? ' class="sub-current"' : '',
+	            $item->title
+	        );
+    	}
+    }
+
+    // add classes to ul sub-menus
+	function start_lvl( &$output, $depth ) {
+	    // depth dependent classes
+	    $indent = ( $depth > 0  ? str_repeat( "\t", $depth ) : '' ); // code indent
+	    $display_depth = ( $depth + 1); // because it counts the first submenu as 0
+	    $classes = array(
+	        'header__menu js-dropdown'
+	        );
+
+	    $class_names = implode( ' ', $classes );
+
+	    // build html
+	    $output .= "\n" . $indent . '<ul class="' . $class_names . '">' . "\n";
+	}
+
+}
+
+
+
+
+/*   end script  */
+
+-------------------------- 3 method end -------------------------------------------
+------------------------------------------------------------------------------------------------
+                                                    Pagination in wordpress
+
+<?php
+$paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
+        $args = array(
+            'post_type' => 'news',
+            'orderby' => 'ID',
+            'order' => 'DESC',
+            'posts_per_page' => 1,
+            'paged' => $paged
+        );
+
+        $the_query = new WP_Query($args);
+
+    ?>
+            <?php if( $the_query->have_posts() ) : ?>
+            
+            <!-- options -->
+            
+            <?php while( $the_query->have_posts() ) : $the_query->the_post(); 
+   
+
+    $post_image_id = get_post_thumbnail_id($post_to_use->ID);
+
+if ($post_image_id) {$thumbnail = wp_get_attachment_image_src( $post_image_id,array(350,350));if ($thumbnail) (string)$thumbnail = $thumbnail[0];}
+
+   ?>
+   <article class="blogpost">
+								<div class="row grid-space-10">
+
+									<div class="col-md-6">
+										
+									<a href="<?php echo get_permalink();?>"><?php the_title();?>
+									<img src="<?php echo $thumbnail;?>" ></a>
+														
+									</div>
+
+									<div class="col-md-6">
+										<header>
+											<h2><a href="<?php echo get_permalink();?>"><?php the_title();?></a></h2>
+											<div class="post-info">
+												<span class="post-date">
+													<i class="icon-calendar"></i>
+													 <?php the_time('F jS, Y'); ?>
+												</span>
+												<span class="submitted"><i class="icon-user-1"></i> by <a href="#">John Doe</a></span>
+												<span class="comments"><i class="icon-chat"></i> <a href="#">22 comments</a></span>
+											</div>
+										</header>
+										<div class="blogpost-content">
+											<p style="text-align: justify;text-justify: inter-word;"><?php the_content();?></p>
+										</div>
+									</div>
+								</div>
+								<footer class="clearfix">
+								
+									<div class="link pull-right"><i class="icon-link"></i><a href="<?php echo get_permalink();?>">Read More</a></div>
+								</footer>
+							</article>
+<?php endwhile; ?>
+         
+            
+            <!-- /.options -->
+            
+            <?php else:  ?>
+            <p>
+              <?php _e( 'Sorry, no posts matched your criteria.' ); ?>
+            </p>
+            <?php endif; ?></div>
+            
+							
+							<nav>
+								<ul class="pagination">
+									<?php
+$big = 999999999; // need an unlikely integer
+echo paginate_links( array(
+    'base' => str_replace( $big, '%#%', get_pagenum_link( $big ) ),
+    'format' => '?paged=%#%',
+    'current' => max( 1, get_query_var('paged') ),
+    'total' => $the_query->max_num_pages
+) );
+                                    ?>
+								</ul>
+							</nav>
+							<!-- pagination end -->
+       
+       
+       ----------------------------------------------------------------------
+       
+                                                multiple image slider with casousal
+       
+       <div id="demo" class="carousel slide" data-ride="carousel">
+
+  <!-- Indicators 
+
+-->
+  <!-- The slideshow -->
+  <div class="carousel-inner">
+
+  <?php $image= array(); $i=0;
+  //echo "SELECT * FROM roomimages WHERE postroom_id='".$results['Postroom_id']."'";
+          $sql=mysqli_query($con,"SELECT * FROM roomimages WHERE postroom_id='".$results['Postroom_id']."'")or die(mysqli_error($con));
+          while($row1=mysqli_fetch_array($sql)){
+        $count=mysqli_num_rows($sql);
+           $image[$i++]=$row1['uploadimage'];
+           ?>
+
+    <div class="carousel-item <?php if($i == 1) echo "active";?>" style="background:transparent url('../roomimages/<?php echo $row1['uploadimage'];?>') no-repeat center center;background-size:cover;height:300px;width:100%">
+    </div>
+    <?php }
+        ?>
+
+  </div>
+
+
+  <ul class="carousel-indicators">
+    <?php for($k=0;$k<$count;$k++)
+    {
+      if($k == 0)
+      {
+?>
+    <li data-target="#demo" data-slide-to="0" class="active"></li>
+
+<?php        
+      }
+      else
+      {
+        ?>
+    <li data-target="#demo" data-slide-to="<?php echo $k;?>" class="active"></li>
+
+        <?php
+      }
+    }
+    ?>
+  </ul>
+
+
+  <!-- Left and right controls -->
+  <a class="carousel-control-prev" href="#demo" data-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </a>
+  <a class="carousel-control-next" href="#demo" data-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </a>
+
+</div>
+
+---------------------------------------------------------------------------
+            
