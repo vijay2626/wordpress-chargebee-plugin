@@ -433,4 +433,277 @@ echo paginate_links( array(
 </div>
 
 ---------------------------------------------------------------------------
+            taxonomy-our-servvices.php
+	    
+	    <?php get_header();
+
+$terms = get_the_terms( $post->ID , 'our-services_category');
+
+if($terms) {
+
+	foreach( $terms as $term ) {
+
+		$cat_obj = get_term($term->term_id, 'our-services_category');
+
+		$cat_slug = $cat_obj->slug;
+
+	}
+
+}
+
+?>
+
+<div class="ast_pagetitle">
+
+<div class="ast_img_overlay"></div>
+
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-lg-12 col-md-12 col-sm-12">
+
+        <div class="page_title">
+
+          <h2><?php echo $cat_obj->name;?></h2>
+
+        </div>
+
+      </div>
+
+      <div class="col-lg-12 col-md-12 col-sm-12">
+
+        <ul class="breadcrumb">
+
+          <li><a href="<?php echo home_url();?>">Home</a></li>
+
+          <li>//</li>
+
+          <li><a href="<?php echo home_url();?>/"><?php echo $cat_obj->name;?></a></li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="ast_service_wrapper ast_toppadder70 ast_bottompadder50">
+
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-lg-8 col-md-8 col-sm-10 col-xs-12 col-lg-offset-2 col-md-offset-2 col-sm-offset-1 col-xs-offset-0">
+
+        <div class="ast_heading">
+
+          <h1><?php echo $cat_obj->name;?></h1>
+
+          <!-- <p>Panditjee online is a leading online portal service for Pandit booking in India and abroad,here you can request to book qualified and best Pandit to perform vedic rituals at your home, offices and work place.</p> -->
+
+        </div>
+
+      </div>
+
+      <div class="row">
+
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+        <div class="row">
+
+          <div class="ast_shop_main">
+
+            <?php 
+
+$terms = get_the_terms( $post->ID , 'our-services_category');
+
+if($terms) {
+
+  foreach( $terms as $term ) {
+
+    $cat_obj = get_term($term->term_id, 'our-services_category');
+
+    $cat_slug = $cat_obj->slug;
+
+  }
+
+}
+
+
+
+         $query = new WP_Query( array( 'post_type' => 'our-services', 'our-services_category' =>$cat_slug, 'order' => 'ASC' ,'posts_per_page'=>-1) );
+
+     while ( $query->have_posts() ) : $query->the_post();  
+
+     $post_image_id = get_post_thumbnail_id($post_to_use->ID);
+
+         if ($post_image_id) {$thumbnail = wp_get_attachment_image_src( $post_image_id,array(350,350));if ($thumbnail) (string)$thumbnail = $thumbnail[0];}
+
+     ?>
+
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+
+        <div class="ast_service_box">
+
+          <?php echo the_post_thumbnail('thumbnail');?>
+
+          <h4><?php the_title();?></h4>
+
+          <p style="text-align: justify;
+
+    text-justify: inter-word;"> <?php 
+
+$trimexcerpt = get_the_content();
+
+
+
+echo $shortexcerpt = wp_trim_words( $trimexcerpt, $num_words = 12, $more = '.....' );?>
+
+                  
+
+          <div class="clearfix"></div>
+
+          <a href="<?php echo get_permalink();?>" class="ast_btn">Read More</a>
+
+        </div>
+
+      </div>
+
+
+
+
+
+          
+
+            <?php 
+
+        endwhile;   
+
+        ?>
+
             
+
+            
+
+          </div>
+
+        </div>
+
+        
+
+      </div>
+
+      
+
+    </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<?php get_footer();?>
+
+
+-----------------------------------
+
+taxonomy-our-product.php
+
+
+<?php get_header();
+$terms = get_the_terms( $post->ID , 'puja_category');
+if($terms) {
+	foreach( $terms as $term ) {
+		$cat_obj = get_term($term->term_id, 'puja_category');
+		$cat_slug = $cat_obj->slug;
+	}
+}
+?>
+<style type="text/css">
+  .ast_pagetitle {
+    background-image: url(<?php echo bloginfo('template_url');?>/HTML/images/banner/b2.jpg) !important;
+    
+}
+</style>
+<div class="ast_pagetitle">
+<div class="ast_img_overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="page_title">
+          <h2><?php echo $cat_obj->name;?></h2>
+        </div>
+      </div>
+      <div class="col-lg-12 col-md-12 col-sm-12">
+        <ul class="breadcrumb">
+          <li><a href="<?php echo home_url();?>">Home</a></li>
+          <li>//</li>
+          <li><a href="<?php echo home_url();?>/"><?php echo $cat_obj->name;?></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ast_service_wrapper ast_toppadder70 ast_bottompadder50">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-8 col-sm-10 col-xs-12 col-lg-offset-2 col-md-offset-2 col-sm-offset-1 col-xs-offset-0">
+        <div class="ast_heading">
+          <h1><?php echo $cat_obj->name;?></h1>
+          <!-- <p>Panditjee online is a leading online portal service for Pandit booking in India and abroad,here you can request to book qualified and best Pandit to perform vedic rituals at your home, offices and work place.</p> -->
+        </div>
+      </div>
+      <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="row">
+          <div class="ast_shop_main">
+            <?php 
+$terms = get_the_terms( $post->ID , 'puja_category');
+if($terms) {
+  foreach( $terms as $term ) {
+    $cat_obj = get_term($term->term_id, 'puja_category');
+    $cat_slug = $cat_obj->slug;
+  }
+}
+
+         $query = new WP_Query( array( 'post_type' => 'puja', 'puja_category' =>$cat_slug, 'order' => 'DESC' ,'posts_per_page'=>-1) );
+     while ( $query->have_posts() ) : $query->the_post();  
+     $post_image_id = get_post_thumbnail_id($post_to_use->ID);
+         if ($post_image_id) {$thumbnail = wp_get_attachment_image_src( $post_image_id,array(350,350));if ($thumbnail) (string)$thumbnail = $thumbnail[0];}
+     ?>
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="ast_service_box" >
+          <?php echo the_post_thumbnail('thumbnail');?>
+          <h4 style="min-height: 50px !important;"><?php the_title();?></h4>
+          <p style="min-height:50px;text-align: justify;
+    text-justify: inter-word;"> <?php 
+$trimexcerpt = get_the_content();
+
+echo $shortexcerpt = wp_trim_words( $trimexcerpt, $num_words = 12, $more = '.....' );?>
+                  
+          <div class="clearfix"></div>
+          <a href="<?php echo home_url();?>/book-now/" class="ast_btn">Book Now  -  ₹ <?php echo get_field('price');?> /-</a>
+        </div>
+      </div>
+
+          
+            <?php 
+        endwhile;   
+        ?>
+            
+            
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    </div>
+  </div>
+</div>
+<?php get_footer();?>
+
